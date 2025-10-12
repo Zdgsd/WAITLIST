@@ -124,14 +124,14 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
     >
       <BootSequenceText />
       
-      <div className="relative z-10 flex items-center justify-center mb-12" style={{ height: '128px' }}>
-        <div className="w-full max-w-[90vw] flex items-center justify-center">
-          <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap overflow-hidden text-ellipsis ${isTyping ? 'glitch-effect-intense' : ''}`} style={{ transform: 'scale(0.9)' }}>
+      <div className="relative z-10 flex items-center justify-center mb-12" style={{ height: 'auto', minHeight: '128px' }}>
+        <div className="w-full max-w-[85vw] flex items-center justify-center py-8">
+          <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-[0.1em] xs:tracking-[0.12em] sm:tracking-[0.15em] font-bold whitespace-nowrap ${isTyping ? 'glitch-effect-intense' : ''}`}>
               <span>{prefix}</span>
-              <span className="inline-block relative z-[1]">
+              <span className="inline-block relative">
                   {oos}
                   {showSmiley && (
-                      <svg className="absolute bottom-[-15%] left-0 w-full h-[60%] z-[2]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
+                      <svg className="absolute bottom-[-10%] left-0 w-full h-[40%]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
                           <path
                               d="M 15 30 C 35 50, 65 50, 85 30"
                               stroke="currentColor"

@@ -74,14 +74,14 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
 
 
   return (
-    <div className="flex flex-col items-center justify-center h-full space-y-4 md:space-y-8 p-4">
-      <div className="w-full max-w-[90vw] flex justify-center">
-        <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.15em] sm:tracking-widest font-normal transition-all duration-300 whitespace-nowrap ${isGlitching ? 'glitch-effect-intense' : ''} ${brandSelected ? 'bg-[var(--terminal-green)] text-black px-2' : ''}`} style={{ transform: 'scale(0.9)' }}>
+    <div className="flex flex-col items-center justify-center h-full space-y-6 md:space-y-10 p-4">
+      <div className="w-full max-w-[85vw] flex justify-center">
+        <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-[0.12em] sm:tracking-[0.15em] font-normal transition-all duration-300 whitespace-nowrap ${isGlitching ? 'glitch-effect-intense' : ''} ${brandSelected ? 'bg-[var(--terminal-green)] text-black px-2' : ''}`}>
           <span>{prefix}</span>
-          <span className="inline-block relative z-[1]">
+          <span className="inline-block relative">
               {oos}
               {showSmiley && (
-                  <svg className="absolute bottom-[-15%] left-0 w-full h-[60%] z-[2]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
+                  <svg className="absolute bottom-[-10%] left-0 w-full h-[40%]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
                       <path
                           d="M 15 30 C 35 50, 65 50, 85 30"
                           stroke="currentColor"
@@ -98,7 +98,7 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
         </h1>
       </div>
       {startTagline && (
-        <p className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-center whitespace-nowrap">
+        <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center whitespace-nowrap px-4">
             {taglineText}
             {!taglineComplete && <span className="animate-blink">_</span>}
         </p>
