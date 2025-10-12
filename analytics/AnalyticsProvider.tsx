@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UserSession, EventData, AnalyticsEvent } from './types';
 
 type AnalyticsContextValue = {
@@ -23,7 +23,7 @@ const BATCH_SIZE = 10;
 const FLUSH_INTERVAL = 5000; // 5 seconds
 
 export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const sessionId = useRef<string>(uuid.v4());
+  const sessionId = useRef<string>(uuidv4());
   const eventQueue = useRef<AnalyticsEvent[]>([]);
   const flushTimeout = useRef<NodeJS.Timeout>();
 
