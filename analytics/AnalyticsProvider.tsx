@@ -19,13 +19,15 @@ const AnalyticsContext = createContext<AnalyticsContextValue>({
   trackPerformance: async () => {},
 });
 
-const BATCH_SIZE = 10;
-const FLUSH_INTERVAL = 5000; // 5 seconds
+const BATCH_SIZE = 5; // Reduced batch size for more frequent updates
+const FLUSH_INTERVAL = 2000; // 2 seconds for more real-time updates
+const DEBUG = true; // Enable debug logging
 
 export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const sessionId = useRef<string>(uuidv4());
   const eventQueue = useRef<AnalyticsEvent[]>([]);
   const flushTimeout = useRef<NodeJS.Timeout>();
+  const isFlushingRef = useRef(false);
 
   const getUserSession = (): UserSession => ({
     sessionId: sessionId.current,
@@ -50,19 +52,40 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const flushEvents = async () => {
-    if (eventQueue.current.length === 0) return;
+    if (eventQueue.current.length === 0 || isFlushingRef.current) return;
 
+    isFlushingRef.current = true;
     const events = eventQueue.current.splice(0, BATCH_SIZE);
+
     try {
-      const { error } = await supabase.from('user_analytics').insert(events);
+      if (DEBUG) {
+        console.log('[Analytics] Flushing events:', events);
+      }
+
+      // Map events to match database structure
+      const mappedEvents = events.map(event => ({
+        ...event,
+        event_timestamp: event.timestamp, // Use the new column name
+        created_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from('user_analytics')
+        .insert(mappedEvents)
+        .select(); // Add select to verify insertion
+
       if (error) {
         console.error('[Analytics] Failed to flush events:', error.message);
         // Put events back in queue if they failed to send
         eventQueue.current = [...events, ...eventQueue.current];
+      } else if (DEBUG) {
+        console.log('[Analytics] Successfully flushed events');
       }
     } catch (err) {
       console.error('[Analytics] Unexpected error while flushing:', err);
       eventQueue.current = [...events, ...eventQueue.current];
+    } finally {
+      isFlushingRef.current = false;
     }
   };
 
@@ -80,13 +103,24 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const trackEvent = async (name: string, props?: Record<string, any>) => {
-    queueEvent({
+    const event = {
       event_type: name,
       event_data: createEventData(props),
       session_id: sessionId.current,
       timestamp: new Date().toISOString(),
       client_timestamp: new Date().toISOString(),
-    });
+    };
+
+    if (DEBUG) {
+      console.log('[Analytics] Tracking event:', event);
+    }
+
+    queueEvent(event);
+
+    // Force immediate flush for important events
+    if (name.includes('form_submission') || name === 'page_view') {
+      flushEvents();
+    }
   };
 
   const trackPageView = async (path: string, props?: Record<string, any>) => {
