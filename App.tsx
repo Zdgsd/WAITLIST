@@ -13,8 +13,7 @@ import { ExitScene } from './components/scenes/ExitScene';
 import { NetworkBackground } from './components/effects/NetworkBackground';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { InvestorPage } from './components/scenes/InvestorPage';
-import { JoinTeamModal } from './components/scenes/JoinTeamModal';
-import { Button } from './components/ui/Button';
+
 import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
 
 const AppContent: React.FC = () => {
@@ -33,7 +32,6 @@ const AppContent: React.FC = () => {
     const [isTransitioning, setIsTransitioning] = React.useState(false);
     const [animationTrigger, setAnimationTrigger] = React.useState(0);
     const [submissionStatus, setSubmissionStatus] = React.useState<SubmissionStatus>('idle');
-    const [isJoinTeamModalOpen, setIsJoinTeamModalOpen] = React.useState(false);
     
     const { trackEvent } = useAnalytics();
     const phaseStartTimeRef = React.useRef(Date.now());
@@ -148,8 +146,6 @@ const AppContent: React.FC = () => {
     
     const corporatePhases = [AppPhase.INVESTOR_PAGE];
     const isCorporate = corporatePhases.includes(phase);
-
-    const showJoinButton = ![AppPhase.CORPORATE_SHELL, AppPhase.INVESTOR_PAGE].includes(phase);
     
     return (
         <main className="h-screen w-screen overflow-hidden">
@@ -168,17 +164,6 @@ const AppContent: React.FC = () => {
                         </CRTWrapper>
                     )}
                 </div>
-                 {showJoinButton && (
-                    <div className="absolute top-4 right-4 md:top-6 md:right-6 z-[99] animate-fade-in pointer-events-auto" style={{ animationDelay: '0.5s'}}>
-                       <Button variant="secondary" onClick={() => {
-                            trackEvent('click', { element_id: 'join_team_button_header' });
-                            setIsJoinTeamModalOpen(true);
-                        }} className="text-base px-3 py-1.5 md:text-lg md:px-4 md:py-2">
-                            Join Our Team
-                        </Button>
-                    </div>
-                 )}
-                <JoinTeamModal isOpen={isJoinTeamModalOpen} onClose={() => setIsJoinTeamModalOpen(false)} />
             </ErrorBoundary>
             <div 
               className="fixed bottom-2 right-2 md:bottom-6 md:right-6 text-xs text-right text-gray-400 z-[1001] pointer-events-none font-mono" 

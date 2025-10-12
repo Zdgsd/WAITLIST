@@ -39,17 +39,17 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       particlesArrayRef.current = [];
       // Adjust particle density based on screen size and device performance
       const isMobile = window.innerWidth < 768;
-      const density = isMobile ? 12000 : 8000; // Lower density on mobile
+      const density = isMobile ? 8000 : 5000; // Higher density (lower number = more particles)
       const numberOfParticles = Math.min(
-        isMobile ? 50 : 70, // Cap max particles on mobile
-        Math.max(30, (canvas.height * canvas.width) / density)
+        isMobile ? 80 : 120, // Increased particle count
+        Math.max(50, (canvas.height * canvas.width) / density)
       );
       for (let i = 0; i < numberOfParticles; i++) {
         const size = Math.random() * (isMobile ? 1.5 : 2) + 1; // Slightly smaller particles on mobile
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
-        const directionX = (Math.random() * 0.4) - 0.2;
-        const directionY = (Math.random() * 0.4) - 0.2;
+        const directionX = (Math.random() * 0.8) - 0.4; // Increased movement speed
+        const directionY = (Math.random() * 0.8) - 0.4;
         const isHighlight = Math.random() < 0.05;
         const color = isHighlight ? WARM_HIGHLIGHT : NODE_COLOR;
 
@@ -73,9 +73,9 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
             const fromParticle = particlesArrayRef.current[a];
             const toParticle = particlesArrayRef.current[b];
             
-            let strokeStyle = `rgba(200, 200, 200, ${opacityValue * 0.25})`;
+            let strokeStyle = `rgba(200, 200, 200, ${opacityValue * 0.4})`; // Increased opacity
             if (fromParticle.isHighlight || toParticle.isHighlight) {
-              strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.4})`;
+              strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.6})`; // Increased highlight opacity
             }
 
             ctx.strokeStyle = strokeStyle;

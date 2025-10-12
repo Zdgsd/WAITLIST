@@ -2,10 +2,7 @@ import React from 'react';
 
 export const CRTWrapper: React.FC<{ children: React.ReactNode; videoActive: boolean }> = ({ children, videoActive }) => {
   const handleTouchMove = React.useCallback((e: React.TouchEvent) => {
-    // Prevent pull-to-refresh and other default touch behaviors
-    if (e.cancelable) {
-      e.preventDefault();
-    }
+    // Touch handler without preventDefault to allow scrolling
   }, []);
 
   return (
@@ -14,14 +11,7 @@ export const CRTWrapper: React.FC<{ children: React.ReactNode; videoActive: bool
       onTouchMove={handleTouchMove}
       style={{ WebkitTouchCallout: 'none' }}>
       {videoActive && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          src="/glitch-background.mp4"
-          className="absolute top-0 left-0 w-full h-full object-cover opacity-30 pointer-events-none z-0"
-        />
+        <div className="absolute top-0 left-0 w-full h-full z-0 bg-black opacity-30" />
       )}
       <div className="screen-border" />
       <div className="white-noise-overlay" />

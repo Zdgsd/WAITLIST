@@ -135,9 +135,17 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
               <Button variant="primary" onClick={() => {
                 trackEvent('click', { element_id: 'navigate_to_investors' });
                 onNavigateToInvestors();
-              }} className="animate-pulse-glow text-xl px-6 py-3">
+              }} className="animate-pulse-glow text-xl px-6 py-3 mb-4">
                 Interested in Helping?
               </Button>
+              <div className="mt-8">
+                <Button variant="secondary" onClick={() => {
+                  trackEvent('click', { element_id: 'join_team_button_footer' });
+                  window.location.href = 'mailto:Bookeeni.contact@gmail.com?subject=Join%20Bookeeni%20Team';
+                }} className="text-lg px-5 py-2.5">
+                  Join Our Team
+                </Button>
+              </div>
             </div>
           </div>
         </div>
