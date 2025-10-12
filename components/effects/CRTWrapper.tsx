@@ -1,8 +1,18 @@
 import React from 'react';
 
 export const CRTWrapper: React.FC<{ children: React.ReactNode; videoActive: boolean }> = ({ children, videoActive }) => {
+  const handleTouchMove = React.useCallback((e: React.TouchEvent) => {
+    // Prevent pull-to-refresh and other default touch behaviors
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+  }, []);
+
   return (
-    <div className="relative w-full h-full overflow-hidden animate-flicker">
+    <div 
+      className="relative w-full h-full overflow-hidden animate-flicker"
+      onTouchMove={handleTouchMove}
+      style={{ WebkitTouchCallout: 'none' }}>
       {videoActive && (
         <video
           autoPlay

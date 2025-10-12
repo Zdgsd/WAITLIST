@@ -37,10 +37,15 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
 
     const init = () => {
       particlesArrayRef.current = [];
-      // Increase particle density for the larger canvas
-      const numberOfParticles = Math.max(70, (canvas.height * canvas.width) / 8000);
+      // Adjust particle density based on screen size and device performance
+      const isMobile = window.innerWidth < 768;
+      const density = isMobile ? 12000 : 8000; // Lower density on mobile
+      const numberOfParticles = Math.min(
+        isMobile ? 50 : 70, // Cap max particles on mobile
+        Math.max(30, (canvas.height * canvas.width) / density)
+      );
       for (let i = 0; i < numberOfParticles; i++) {
-        const size = Math.random() * 2 + 1;
+        const size = Math.random() * (isMobile ? 1.5 : 2) + 1; // Slightly smaller particles on mobile
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
         const directionX = (Math.random() * 0.4) - 0.2;
