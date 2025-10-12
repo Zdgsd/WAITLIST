@@ -75,6 +75,10 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
   }, [isCompleting, trackEvent, onComplete]);
 
   useEffect(() => {
+    trackEvent('page_view', { page: 'CorporateShell' });
+  }, [trackEvent]);
+
+  useEffect(() => {
     const preTypingCursorTimer = setTimeout(() => {
         setShowPreTypingCursor(true);
     }, 2000); // Show cursor after boot sequence
@@ -122,7 +126,7 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
       
       <div className="relative z-10 flex items-center justify-center mb-12" style={{ height: '128px' }}>
         <div className="w-full max-w-[90vw] flex items-center justify-center">
-          <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap ${isTyping ? 'glitch-effect-intense' : ''}`} style={{ transform: 'scale(0.9)' }}>
+          <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap overflow-hidden text-ellipsis ${isTyping ? 'glitch-effect-intense' : ''}`} style={{ transform: 'scale(0.9)' }}>
               <span>{prefix}</span>
               <span className="inline-block relative">
                   {oos}

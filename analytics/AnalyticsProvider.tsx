@@ -1,4 +1,5 @@
 import React, { createContext, useContext } from 'react';
+import { supabase } from '../supabaseClient';
 
 type AnalyticsEventProps = Record<string, any> | undefined;
 
@@ -11,13 +12,21 @@ const AnalyticsContext = createContext<AnalyticsContextValue>({
 });
 
 export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const trackEvent = (name: string, props?: AnalyticsEventProps) => {
-    // Minimal no-op provider for environments without a real analytics implementation.
-    // You can integrate Google Analytics, Segment, Plausible, etc. here.
-    if (typeof window !== 'undefined') {
-      // Optionally expose for debugging
-      // eslint-disable-next-line no-console
-      console.debug('[Analytics] trackEvent', name, props);
+  const trackEvent = async (name: string, props?: AnalyticsEventProps) => {
+    try {
+      const { error } = await supabase.from('user_analytics').insert([
+        {
+          event_type: name,
+          event_data: props || {},
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+
+      if (error) {
+        console.error('[Analytics] Failed to track event:', error.message);
+      }
+    } catch (err) {
+      console.error('[Analytics] Unexpected error:', err);
     }
   };
 

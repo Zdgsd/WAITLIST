@@ -74,6 +74,15 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
     return () => clearTimeout(timer);
   }, [status, setStatus, data, memoryNumber]);
 
+  React.useEffect(() => {
+    trackEvent('page_view', { page: 'CompletionScene' });
+  }, [trackEvent]);
+
+  const handleButtonClick = () => {
+    trackEvent('button_click', { button: 'Interested in Helping' });
+    onNavigateToInvestors();
+  };
+
   if (status === 'success') {
     const roleLabel = ALL_ROLES.find(r => r.id === data.role)?.label || 'Explorer';
     return (
@@ -132,10 +141,7 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
 
             <div className="pt-4 animate-fade-in" style={{ animationDelay: '1.2s' }}>
               <p className="text-gray-400 mb-4">Or for partnership inquiries:</p>
-              <Button variant="primary" onClick={() => {
-                trackEvent('click', { element_id: 'navigate_to_investors' });
-                onNavigateToInvestors();
-              }} className="animate-pulse-glow text-xl px-6 py-3 mb-4">
+              <Button variant="primary" onClick={handleButtonClick} className="animate-pulse-glow text-xl px-6 py-3 mb-4">
                 Interested in Helping?
               </Button>
               <div className="mt-8">
