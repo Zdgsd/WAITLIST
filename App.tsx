@@ -154,20 +154,22 @@ const AppContent: React.FC = () => {
     return (
         <main className="h-screen w-screen overflow-hidden">
             <ErrorBoundary>
-                {isCorporate ? (
-                    <div key={phase} className="w-full h-full animate-fade-in-zoom">
-                        {renderPhase()}
-                    </div>
-                ) : (
-                    <CRTWrapper videoActive={videoActive}>
-                        <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} />
+                <div className="relative w-full h-full">
+                    {isCorporate ? (
                         <div key={phase} className="w-full h-full animate-fade-in-zoom">
                             {renderPhase()}
                         </div>
-                    </CRTWrapper>
-                )}
+                    ) : (
+                        <CRTWrapper videoActive={videoActive}>
+                            <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} />
+                            <div key={phase} className="w-full h-full animate-fade-in-zoom">
+                                {renderPhase()}
+                            </div>
+                        </CRTWrapper>
+                    )}
+                </div>
                  {showJoinButton && (
-                    <div className="fixed top-4 right-4 md:top-6 md:right-6 z-[1001] animate-fade-in" style={{ animationDelay: '0.5s'}}>
+                    <div className="absolute top-4 right-4 md:top-6 md:right-6 z-[99] animate-fade-in pointer-events-auto" style={{ animationDelay: '0.5s'}}>
                        <Button variant="secondary" onClick={() => {
                             trackEvent('click', { element_id: 'join_team_button_header' });
                             setIsJoinTeamModalOpen(true);

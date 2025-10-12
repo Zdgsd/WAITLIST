@@ -121,27 +121,29 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
       <BootSequenceText />
       
       <div className="relative z-10 flex items-center justify-center mb-12" style={{ height: '128px' }}>
-        <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap ${isTyping ? 'glitch-effect-intense' : ''}`}>
-            <span>{prefix}</span>
-            <span className="inline-block relative">
-                {oos}
-                {showSmiley && (
-                    <svg className="absolute bottom-[-15%] left-0 w-full h-[60%]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
-                        <path
-                            d="M 15 30 C 35 50, 65 50, 85 30"
-                            stroke="var(--terminal-green)"
-                            strokeWidth="5"
-                            strokeLinecap="round"
-                            fill="none"
-                            className="animate-draw-smiley"
-                        />
-                    </svg>
-                )}
-            </span>
-            <span>{suffix}</span>
-            {isTyping && <span className="animate-blink">_</span>}
-            {showPreTypingCursor && <span className="animate-blink-3">_</span>}
-        </h1>
+        <div className="w-full max-w-[90vw] flex items-center justify-center">
+          <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap ${isTyping ? 'glitch-effect-intense' : ''}`} style={{ transform: 'scale(0.9)' }}>
+              <span>{prefix}</span>
+              <span className="inline-block relative">
+                  {oos}
+                  {showSmiley && (
+                      <svg className="absolute bottom-[-15%] left-0 w-full h-[60%]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
+                          <path
+                              d="M 15 30 C 35 50, 65 50, 85 30"
+                              stroke="var(--terminal-green)"
+                              strokeWidth="5"
+                              strokeLinecap="round"
+                              fill="none"
+                              className="animate-draw-smiley"
+                          />
+                      </svg>
+                  )}
+              </span>
+              <span>{suffix}</span>
+              {isTyping && <span className="animate-blink">_</span>}
+              {showPreTypingCursor && <span className="animate-blink-3">_</span>}
+          </h1>
+        </div>
       </div>
 
       <div className="relative z-10 flex items-center justify-center" style={{ height: '80px' }}>
