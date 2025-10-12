@@ -63,20 +63,42 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
   const [isCompleting, setIsCompleting] = useState(false);
   const [showPreTypingCursor, setShowPreTypingCursor] = useState(false);
   const typingIntervalRef = useRef<number | null>(null);
-  const { trackEvent } = useAnalytics();
+  const { trackEvent, trackInteraction, trackPageView, trackPerformance } = useAnalytics();
   
   const fullTitle = "BOOKEENI";
 
   const handleComplete = useCallback(() => {
     if (isCompleting) return;
-    trackEvent('click', { element_id: 'initialize_connection_button' });
+    trackInteraction('initialize_connection_button', 'click', {
+      isTyping,
+      showSmiley,
+      titleComplete: prefix + oos + suffix === fullTitle
+    });
     setIsCompleting(true);
     onComplete();
-  }, [isCompleting, trackEvent, onComplete]);
+  }, [isCompleting, trackInteraction, onComplete, isTyping, showSmiley, prefix, oos, suffix, fullTitle]);
 
   useEffect(() => {
-    trackEvent('page_view', { page: 'CorporateShell' });
-  }, [trackEvent]);
+    trackPageView('corporate-shell', {
+      screen: 'CorporateShell',
+      screenSize: `${window.innerWidth}x${window.innerHeight}`
+    });
+
+    // Track performance metrics
+    const observer = new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      entries.forEach((entry) => {
+        trackPerformance({
+          duration: entry.duration,
+          startTime: entry.startTime
+        });
+      });
+    });
+
+    observer.observe({ entryTypes: ['paint', 'largest-contentful-paint'] });
+
+    return () => observer.disconnect();
+  }, [trackPageView, trackPerformance]);
 
   useEffect(() => {
     const preTypingCursorTimer = setTimeout(() => {
