@@ -65,7 +65,7 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
             
             setStatus('success');
         } catch (error) {
-            console.error("Error submitting to Supabase:", (error as any)?.message || error);
+            console.error("Error submitting to Supabase:", error instanceof Error ? error.message : String(error));
             setStatus('error');
         }
     };

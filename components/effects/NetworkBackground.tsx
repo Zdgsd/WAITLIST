@@ -30,12 +30,16 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let isMounted = true; // Flag to prevent operations after unmount
+
     const setCanvasSize = () => {
+      if (!isMounted) return;
       canvas.width = window.innerWidth * 2; // Make canvas wider for panning
       canvas.height = window.innerHeight * 2; // Make canvas taller for panning
     };
 
     const init = () => {
+      if (!isMounted) return;
       particlesArrayRef.current = [];
       // Adjust particle density based on screen size and device performance
       const isMobile = window.innerWidth < 768;
@@ -58,6 +62,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     };
 
     const connect = () => {
+      if (!isMounted) return;
       let opacityValue = 1;
       const connectDistance = Math.min(canvas.width, canvas.height) / 9;
 
@@ -66,13 +71,13 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
           const dx = particlesArrayRef.current[a].x - particlesArrayRef.current[b].x;
           const dy = particlesArrayRef.current[a].y - particlesArrayRef.current[b].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          
+
           if (distance < connectDistance) {
             opacityValue = 1 - (distance / connectDistance);
-            
+
             const fromParticle = particlesArrayRef.current[a];
             const toParticle = particlesArrayRef.current[b];
-            
+
             let strokeStyle = `rgba(200, 200, 200, ${opacityValue * 0.4})`; // Increased opacity
             if (fromParticle.isHighlight || toParticle.isHighlight) {
               strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.6})`; // Increased highlight opacity
@@ -90,14 +95,16 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     };
 
     const animate = () => {
+      if (!isMounted) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const particles = particlesArrayRef.current;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-        
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2, false);
-        
+
         ctx.shadowColor = p.isHighlight ? WARM_HIGHLIGHT : 'rgba(200, 200, 200, 0.5)';
         ctx.shadowBlur = p.isHighlight ? 15 : 5;
         ctx.fillStyle = p.color;
@@ -112,13 +119,14 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
         if (p.y > canvas.height + p.size) p.y = -p.size;
         else if (p.y < -p.size) p.y = canvas.height + p.size;
       }
-      
+
       ctx.shadowBlur = 0;
       connect();
       animationFrameId.current = requestAnimationFrame(animate);
     };
 
     const handleResize = () => {
+      if (!isMounted) return;
       setCanvasSize();
       init();
     };
@@ -130,9 +138,11 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     window.addEventListener('resize', handleResize);
 
     return () => {
+      isMounted = false;
       window.removeEventListener('resize', handleResize);
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
+        animationFrameId.current = null;
       }
     };
   }, []);

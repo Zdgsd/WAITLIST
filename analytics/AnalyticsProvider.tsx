@@ -19,9 +19,9 @@ const AnalyticsContext = createContext<AnalyticsContextValue>({
   trackPerformance: async () => {},
 });
 
-const BATCH_SIZE = 5; // Reduced batch size for more frequent updates
-const FLUSH_INTERVAL = 2000; // 2 seconds for more real-time updates
-const DEBUG = true; // Enable debug logging
+const BATCH_SIZE = 10; // Increased batch size for better performance
+const FLUSH_INTERVAL = 10000; // 10 seconds for reduced network requests
+const DEBUG = process.env.NODE_ENV === 'development'; // Only debug in development
 
 export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const sessionId = useRef<string>(uuidv4());
@@ -30,10 +30,10 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const isFlushingRef = useRef(false);
 
   const getUserSession = (): UserSession => ({
-    sessionId: sessionId.current,
-    startTime: new Date().toISOString(),
-    userAgent: navigator.userAgent,
-    screenSize: `${window.screen.width}x${window.screen.height}`,
+    session_id: sessionId.current,
+    start_time: new Date().toISOString(),
+    user_agent: navigator.userAgent,
+    screen_size: `${window.screen.width}x${window.screen.height}`,
     language: navigator.language,
     referrer: document.referrer,
     platform: navigator.platform
@@ -60,26 +60,32 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       if (DEBUG) {
         console.log('[Analytics] Flushing events:', events);
+        console.log('[Analytics] Supabase client:', supabase);
       }
 
-      // Map events to match database structure
+      // Map events to match the database schema
       const mappedEvents = events.map(event => ({
-        ...event,
-        event_timestamp: event.timestamp, // Use the new column name
-        created_at: new Date().toISOString(),
+        event_type: event.event_type,
+        event_data: event.event_data,
+        session_id: event.session_id,
+        client_timestamp: new Date(event.client_timestamp).toISOString()
       }));
 
-      const { error } = await supabase
+      if (DEBUG) {
+        console.log('[Analytics] Mapped events for insertion:', mappedEvents);
+      }
+
+      const { data, error } = await supabase
         .from('user_analytics')
         .insert(mappedEvents)
-        .select(); // Add select to verify insertion
+        .select();
 
       if (error) {
-        console.error('[Analytics] Failed to flush events:', error.message);
+        console.error('[Analytics] Failed to flush events:', error.message, error.details, error.hint);
         // Put events back in queue if they failed to send
         eventQueue.current = [...events, ...eventQueue.current];
       } else if (DEBUG) {
-        console.log('[Analytics] Successfully flushed events');
+        console.log('[Analytics] Successfully flushed events, inserted data:', data);
       }
     } catch (err) {
       console.error('[Analytics] Unexpected error while flushing:', err);
@@ -101,13 +107,11 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }, FLUSH_INTERVAL);
     }
   };
-
   const trackEvent = async (name: string, props?: Record<string, any>) => {
     const event = {
       event_type: name,
       event_data: createEventData(props),
       session_id: sessionId.current,
-      timestamp: new Date().toISOString(),
       client_timestamp: new Date().toISOString(),
     };
 
@@ -121,7 +125,7 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (name.includes('form_submission') || name === 'page_view') {
       flushEvents();
     }
-  };
+   };
 
   const trackPageView = async (path: string, props?: Record<string, any>) => {
     queueEvent({
@@ -132,7 +136,6 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ...props
       }),
       session_id: sessionId.current,
-      timestamp: new Date().toISOString(),
       client_timestamp: new Date().toISOString(),
     });
   };
@@ -146,7 +149,6 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ...props
       }),
       session_id: sessionId.current,
-      timestamp: new Date().toISOString(),
       client_timestamp: new Date().toISOString(),
     });
   };
@@ -162,7 +164,6 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }),
       session_id: sessionId.current,
-      timestamp: new Date().toISOString(),
       client_timestamp: new Date().toISOString(),
     });
   };
@@ -174,7 +175,6 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         metrics
       }),
       session_id: sessionId.current,
-      timestamp: new Date().toISOString(),
       client_timestamp: new Date().toISOString(),
     });
   };
@@ -182,9 +182,14 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Initialize session
   useEffect(() => {
     const session = getUserSession();
-    supabase.from('user_sessions').insert([session]).then(({ error }) => {
+    if (DEBUG) {
+      console.log('[Analytics] Creating session:', session);
+    }
+    supabase.from('user_sessions').insert([session]).then(({ data, error }) => {
       if (error) {
-        console.error('[Analytics] Failed to create session:', error.message);
+        console.error('[Analytics] Failed to create session:', error.message, error.details, error.hint);
+      } else if (DEBUG) {
+        console.log('[Analytics] Session created successfully:', data);
       }
     });
 

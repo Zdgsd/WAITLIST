@@ -1,8 +1,8 @@
 export interface UserSession {
-  sessionId: string;
-  startTime: string;
-  userAgent: string;
-  screenSize: string;
+  session_id: string;
+  start_time: string;
+  user_agent: string;
+  screen_size: string;
   language: string;
   referrer: string;
   platform: string;
@@ -23,7 +23,5 @@ export type AnalyticsEvent = {
   event_type: string;
   event_data: EventData;
   session_id: string;
-  user_id?: string | null;
-  timestamp: string;
   client_timestamp: string;
 }
