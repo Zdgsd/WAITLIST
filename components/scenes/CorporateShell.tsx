@@ -121,7 +121,7 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
       <BootSequenceText />
       
       <div className="relative z-10 flex items-center justify-center mb-12" style={{ height: '128px' }}>
-        <h1 className={`text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.2em] font-bold ${isTyping ? 'glitch-effect-intense' : ''}`}>
+        <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap ${isTyping ? 'glitch-effect-intense' : ''}`}>
             <span>{prefix}</span>
             <span className="inline-block relative">
                 {oos}
