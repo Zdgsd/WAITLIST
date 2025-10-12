@@ -128,13 +128,13 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
         <div className="w-full max-w-[90vw] flex items-center justify-center">
           <h1 className={`text-4xl xs:text-5xl sm:text-6xl md:text-8xl lg:text-9xl tracking-[0.1em] xs:tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap overflow-hidden text-ellipsis ${isTyping ? 'glitch-effect-intense' : ''}`} style={{ transform: 'scale(0.9)' }}>
               <span>{prefix}</span>
-              <span className="inline-block relative">
+              <span className="inline-block relative z-[1]">
                   {oos}
                   {showSmiley && (
-                      <svg className="absolute bottom-[-15%] left-0 w-full h-[60%]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
+                      <svg className="absolute bottom-[-15%] left-0 w-full h-[60%] z-[2]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
                           <path
                               d="M 15 30 C 35 50, 65 50, 85 30"
-                              stroke="var(--terminal-green)"
+                              stroke="currentColor"
                               strokeWidth="5"
                               strokeLinecap="round"
                               fill="none"
