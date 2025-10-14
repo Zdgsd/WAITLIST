@@ -15,6 +15,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { InvestorPage } from './components/scenes/InvestorPage';
 
 import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
+import { supabase } from './supabaseClient';
 
 const AppContent: React.FC = () => {
     const [phase, setPhase] = React.useState<AppPhase>(AppPhase.CORPORATE_SHELL);
@@ -37,6 +38,10 @@ const AppContent: React.FC = () => {
     const phaseStartTimeRef = React.useRef(Date.now());
     const previousPhaseRef = React.useRef<AppPhase>(AppPhase.CORPORATE_SHELL);
 
+    const triggerBackgroundAnimation = React.useCallback(() => {
+        setAnimationTrigger(count => count + 1);
+    }, []);
+
     const handlePhaseChange = React.useCallback((newPhase: AppPhase) => {
         const now = Date.now();
         const durationMs = now - phaseStartTimeRef.current;
@@ -49,11 +54,8 @@ const AppContent: React.FC = () => {
         phaseStartTimeRef.current = now;
         previousPhaseRef.current = newPhase;
         setPhase(newPhase);
+        triggerBackgroundAnimation();
     }, [trackEvent]);
-    
-    const triggerBackgroundAnimation = React.useCallback(() => {
-        setAnimationTrigger(count => count + 1);
-    }, []);
 
     React.useEffect(() => {
         if (phase === AppPhase.CORPORATE_SHELL && animationTrigger === 0) {
@@ -107,7 +109,7 @@ const AppContent: React.FC = () => {
                 return <CorporateShell onComplete={() => {
                     handlePhaseChange(AppPhase.INITIALIZATION);
                     setVideoActive(true);
-                }} />;
+                }} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
             case AppPhase.INITIALIZATION:
                 return <InitializationScene onComplete={() => handlePhaseChange(AppPhase.IMAGINE_IF)} />;
             case AppPhase.IMAGINE_IF:
@@ -121,7 +123,7 @@ const AppContent: React.FC = () => {
             case AppPhase.BRAND_REVEAL:
                 return <BrandRevealScene onComplete={() => handlePhaseChange(AppPhase.INVITATION_BOX)} />;
             case AppPhase.INVITATION_BOX:
-                return <InvitationScene onComplete={handleInvitationComplete} />;
+                return <InvitationScene onComplete={handleInvitationComplete} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
             case AppPhase.MEMORY_EXCHANGE:
                 return <MemoryExchangeScene email={memoryData.email} memoryNumber={memoryNumber} onSubmit={handleMemorySubmit} onExit={() => handlePhaseChange(AppPhase.EXIT)} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
             case AppPhase.COMPLETION:
@@ -131,6 +133,7 @@ const AppContent: React.FC = () => {
                   onNavigateToInvestors={() => handlePhaseChange(AppPhase.INVESTOR_PAGE)} 
                   status={submissionStatus}
                   setStatus={setSubmissionStatus}
+                  triggerBackgroundAnimation={triggerBackgroundAnimation}
                 /> : null;
             case AppPhase.INVESTOR_PAGE:
                 return <InvestorPage onBack={() => handlePhaseChange(AppPhase.COMPLETION)} />;
@@ -140,7 +143,7 @@ const AppContent: React.FC = () => {
                 return <CorporateShell onComplete={() => {
                     handlePhaseChange(AppPhase.INITIALIZATION);
                     setVideoActive(true);
-                }} />;
+                }} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
         }
     };
     
@@ -157,7 +160,7 @@ const AppContent: React.FC = () => {
                         </div>
                     ) : (
                         <CRTWrapper videoActive={videoActive}>
-                            <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} />
+                            <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} animationTrigger={animationTrigger} />
                             <div key={phase} className="w-full h-full animate-fade-in-zoom">
                                 {renderPhase()}
                             </div>

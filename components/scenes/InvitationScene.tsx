@@ -4,11 +4,12 @@ import { Button } from '../ui/Button';
 
 interface SceneProps {
   onComplete: (email: string) => void;
+  triggerBackgroundAnimation: () => void;
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const InvitationScene: React.FC<SceneProps> = ({ onComplete }) => {
+export const InvitationScene: React.FC<SceneProps> = ({ onComplete, triggerBackgroundAnimation }) => {
   const { displayText: inviteText, isComplete: inviteComplete } = useTypewriter("You Have Been Invited.", 100);
   const [showPrompt, setShowPrompt] = React.useState(false);
   const { displayText: promptText, isComplete: promptComplete } = useTypewriter("Will You Join The Movement?", 100);
@@ -38,6 +39,7 @@ export const InvitationScene: React.FC<SceneProps> = ({ onComplete }) => {
 
   const handleJoin = () => {
     if (isValidEmail) {
+      triggerBackgroundAnimation();
       onComplete(email);
     }
   }

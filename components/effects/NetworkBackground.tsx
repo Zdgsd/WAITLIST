@@ -11,17 +11,34 @@ interface Particle {
   size: number;
   color: string;
   isHighlight: boolean;
+  speedMultiplier: number;
 }
 
 interface NetworkBackgroundProps {
   offset: { x: number; y: number };
   isTransitioning: boolean;
+  animationTrigger: number;
 }
 
-const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, isTransitioning }) => {
+const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, isTransitioning, animationTrigger }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number | null>(null);
   const particlesArrayRef = useRef<Particle[]>([]);
+  const isMountedRef = useRef(true);
+  const burstState = useRef({ active: false, duration: 0, started: 0 });
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (animationTrigger > 0) {
+      burstState.current = { active: true, duration: 500, started: Date.now() };
+    }
+  }, [animationTrigger]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -30,41 +47,37 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let isMounted = true; // Flag to prevent operations after unmount
-
     const setCanvasSize = () => {
-      if (!isMounted) return;
-      canvas.width = window.innerWidth * 2; // Make canvas wider for panning
-      canvas.height = window.innerHeight * 2; // Make canvas taller for panning
+      if (!isMountedRef.current) return;
+      canvas.width = window.innerWidth * 2;
+      canvas.height = window.innerHeight * 2;
     };
 
     const init = () => {
-      if (!isMounted) return;
+      if (!isMountedRef.current) return;
       particlesArrayRef.current = [];
-      // Adjust particle density based on screen size and device performance
       const isMobile = window.innerWidth < 768;
-      const density = isMobile ? 8000 : 5000; // Higher density (lower number = more particles)
+      const density = isMobile ? 7000 : 4000;
       const numberOfParticles = Math.min(
-        isMobile ? 80 : 120, // Increased particle count
-        Math.max(50, (canvas.height * canvas.width) / density)
+        isMobile ? 100 : 150,
+        Math.max(60, (canvas.height * canvas.width) / density)
       );
       for (let i = 0; i < numberOfParticles; i++) {
-        const size = Math.random() * (isMobile ? 1.5 : 2) + 1; // Slightly smaller particles on mobile
+        const size = Math.random() * (isMobile ? 1.8 : 2.2) + 1;
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
-        const directionX = (Math.random() * 0.8) - 0.4; // Increased movement speed
-        const directionY = (Math.random() * 0.8) - 0.4;
-        const isHighlight = Math.random() < 0.05;
+        const directionX = (Math.random() * 0.6) - 0.3;
+        const directionY = (Math.random() * 0.6) - 0.3;
+        const isHighlight = Math.random() < 0.08;
         const color = isHighlight ? WARM_HIGHLIGHT : NODE_COLOR;
 
-        particlesArrayRef.current.push({ x, y, directionX, directionY, size, color, isHighlight });
+        particlesArrayRef.current.push({ x, y, directionX, directionY, size, color, isHighlight, speedMultiplier: 1 });
       }
     };
 
-    const connect = () => {
-      if (!isMounted) return;
-      let opacityValue = 1;
-      const connectDistance = Math.min(canvas.width, canvas.height) / 9;
+    const connect = (burstProgress: number) => {
+      if (!isMountedRef.current) return;
+      const connectDistance = (Math.min(canvas.width, canvas.height) / 10) * (1 + burstProgress * 0.5);
 
       for (let a = 0; a < particlesArrayRef.current.length; a++) {
         for (let b = a + 1; b < particlesArrayRef.current.length; b++) {
@@ -73,14 +86,13 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < connectDistance) {
-            opacityValue = 1 - (distance / connectDistance);
-
+            const opacityValue = 1 - (distance / connectDistance);
             const fromParticle = particlesArrayRef.current[a];
             const toParticle = particlesArrayRef.current[b];
 
-            let strokeStyle = `rgba(200, 200, 200, ${opacityValue * 0.4})`; // Increased opacity
+            let strokeStyle = `rgba(200, 200, 200, ${opacityValue * 0.5 * (1 + burstProgress * 0.5)})`;
             if (fromParticle.isHighlight || toParticle.isHighlight) {
-              strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.6})`; // Increased highlight opacity
+              strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.7 * (1 + burstProgress * 0.5)})`;
             }
 
             ctx.strokeStyle = strokeStyle;
@@ -95,12 +107,23 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     };
 
     const animate = () => {
-      if (!isMounted) return;
+      if (!isMountedRef.current) return;
+
+      let burstProgress = 0;
+      if (burstState.current.active) {
+        const elapsed = Date.now() - burstState.current.started;
+        if (elapsed < burstState.current.duration) {
+          burstProgress = Math.sin((elapsed / burstState.current.duration) * Math.PI);
+        } else {
+          burstState.current.active = false;
+        }
+      }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const particles = particlesArrayRef.current;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
+        const speedMultiplier = 1 + burstProgress * 4;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2, false);
@@ -110,10 +133,9 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
         ctx.fillStyle = p.color;
         ctx.fill();
 
-        p.x += p.directionX;
-        p.y += p.directionY;
+        p.x += p.directionX * speedMultiplier;
+        p.y += p.directionY * speedMultiplier;
 
-        // Wraparound logic to create an infinite field
         if (p.x > canvas.width + p.size) p.x = -p.size;
         else if (p.x < -p.size) p.x = canvas.width + p.size;
         if (p.y > canvas.height + p.size) p.y = -p.size;
@@ -121,12 +143,12 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       }
 
       ctx.shadowBlur = 0;
-      connect();
+      connect(burstProgress);
       animationFrameId.current = requestAnimationFrame(animate);
     };
 
     const handleResize = () => {
-      if (!isMounted) return;
+      if (!isMountedRef.current) return;
       setCanvasSize();
       init();
     };
@@ -138,7 +160,6 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     window.addEventListener('resize', handleResize);
 
     return () => {
-      isMounted = false;
       window.removeEventListener('resize', handleResize);
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);

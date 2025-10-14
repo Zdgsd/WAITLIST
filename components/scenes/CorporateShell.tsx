@@ -51,9 +51,10 @@ const BootSequenceText = memo(() => {
 
 interface CorporateShellProps {
   onComplete: () => void;
+  triggerBackgroundAnimation: () => void;
 }
 
-export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) => {
+export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete, triggerBackgroundAnimation }) => {
   const [prefix, setPrefix] = useState('');
   const [oos, setOos] = useState('');
   const [suffix, setSuffix] = useState('');
@@ -69,6 +70,7 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
 
   const handleComplete = useCallback(() => {
     if (isCompleting) return;
+    triggerBackgroundAnimation();
     trackInteraction('initialize_connection_button', 'click', {
       isTyping,
       showSmiley,
@@ -76,7 +78,7 @@ export const CorporateShell: React.FC<CorporateShellProps> = ({ onComplete }) =>
     });
     setIsCompleting(true);
     onComplete();
-  }, [isCompleting, trackInteraction, onComplete, isTyping, showSmiley, prefix, oos, suffix, fullTitle]);
+  }, [isCompleting, triggerBackgroundAnimation, trackInteraction, onComplete, isTyping, showSmiley, prefix, oos, suffix, fullTitle]);
 
   useEffect(() => {
     trackPageView('corporate-shell', {
