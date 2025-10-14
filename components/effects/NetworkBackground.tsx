@@ -57,7 +57,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       if (!isMountedRef.current) return;
       particlesArrayRef.current = [];
       const isMobile = window.innerWidth < 768;
-      const density = isMobile ? 7000 : 4000;
+      const density = isMobile ? 3000 : 1500;
       const numberOfParticles = Math.min(
         isMobile ? 100 : 150,
         Math.max(60, (canvas.height * canvas.width) / density)

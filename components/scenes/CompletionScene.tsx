@@ -96,8 +96,8 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
             
             {userCount !== null && (
               <div className="text-center mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                <p className="text-xl text-gray-400">Welcome,</p>
-                <p className="text-3xl md:text-4xl font-bold text-white">{roleLabel} #{userCount}</p>
+                <p className="text-lg sm:text-xl text-gray-400">Welcome,</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{roleLabel} #{userCount}</p>
               </div>
             )}
 
@@ -105,25 +105,25 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
               About + Join Us
             </h1>
             
-            <div className="space-y-10 text-lg text-gray-300">
+            <div className="space-y-8 text-base sm:text-lg text-gray-300">
               <section className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <h2 className="text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">The First of Our Kind</h2>
-                <p>We’re Bookeeni.<br/>The first platform built for the live creator era —<br/>where artists, organizers, and fans connect without permission.</p>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">The First of Our Kind</h2>
+                <p>We’re Bookeeni. The first platform built for the live creator era — where artists, organizers, and fans connect without permission.</p>
               </section>
 
               <section className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-                <p>We asked one question:<br/><span className="text-white italic">What if live art didn’t need gatekeepers?</span></p>
-                <p className="mt-4">Bookeeni is our answer — a direct, creator-driven network that turns every show, street performance, or pop-up into a living, growing ecosystem.<br/>No middlemen. No waiting for validation. Just creators, audiences, and real connection.</p>
+                <p>We asked one question: <span className="text-white italic">What if live art didn’t need gatekeepers?</span></p>
+                <p className="mt-4">Bookeeni is our answer — a direct, creator-driven network that turns every show, street performance, or pop-up into a living, growing ecosystem. No middlemen. No waiting for validation. Just creators, audiences, and real connection.</p>
               </section>
 
               <section className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
-                <h2 className="text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">Why We Exist</h2>
-                <p>Live experiences are coming back — but the system behind them is still broken.<br/>Creators lose control. Organizers chase trends. Fans can’t find what’s real.</p>
-                <p className="mt-4">We’re changing that.<br/>Bookeeni gives power back to the people who make culture —<br/>by making it easy to connect, book, and grow directly.<br/>From creators → to explorers → from fans → to full house.</p>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">Why We Exist</h2>
+                <p>Live experiences are coming back — but the system behind them is still broken. Creators lose control. Organizers chase trends. Fans can’t find what’s real.</p>
+                <p className="mt-4">We’re changing that. Bookeeni gives power back to the people who make culture — by making it easy to connect, book, and grow directly. From creators → to explorers → from fans → to full house.</p>
               </section>
 
               <section className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
-                <h2 className="text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">Why Join Us</h2>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">Why Join Us</h2>
                 <p className="mb-4">Be part of the first platform rewriting how live art works.</p>
                 <ul className="list-none space-y-3 text-left max-w-lg mx-auto">
                   <li><span className="text-[var(--terminal-green)] mr-2">→</span> Shape the movement — early voices influence how Bookeeni grows.</li>
@@ -134,8 +134,8 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
               </section>
 
               <section className="animate-fade-in" style={{ animationDelay: '1.0s' }}>
-                <h2 className="text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">Join the First Wave</h2>
-                <p>If you believe live art deserves a new system,<br/>if you’re tired of algorithms deciding what matters —<br/>join us.</p>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 text-[var(--terminal-green)]">Join the First Wave</h2>
+                <p>If you believe live art deserves a new system, if you’re tired of algorithms deciding what matters — join us.</p>
                 <p className="mt-4">Send a message to <a href="mailto:Bookeeni.contact@gmail.com" className="text-white font-bold hover:underline">Bookeeni.contact@gmail.com</a></p>
                 <p className="mt-2">Tell us who you are, what you create, and why you care.</p>
               </section>
@@ -166,9 +166,9 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
   // UI for idle, submitting, error states
   return (
     <div className="flex flex-col items-center justify-center h-full text-center p-4 md:p-8">
-      <h1 className="text-5xl sm:text-6xl md:text-8xl mb-8 tracking-widest font-bold">BOOKEENI</h1>
+      <h1 className="text-4xl sm:text-6xl md:text-8xl mb-8 tracking-widest font-bold">BOOKEENI</h1>
       <div className="w-full max-w-2xl">
-        <p className="text-2xl md:text-3xl lg:text-4xl mb-8 h-12" aria-live="polite" aria-atomic="true">
+        <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl mb-8 h-12" aria-live="polite" aria-atomic="true">
           {statusText}
           {(status === 'submitting' || status === 'idle') && <span className="animate-blink">_</span>}
         </p>

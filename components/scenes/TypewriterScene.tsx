@@ -20,7 +20,7 @@ export const TypewriterScene: React.FC<TypewriterSceneProps> = ({ text, speed = 
 
   return (
     <div className="flex items-center justify-center h-full text-center p-4">
-      <p className="text-3xl md:text-5xl" aria-live="polite" aria-atomic="true">
+      <p className="text-2xl sm:text-3xl md:text-5xl" aria-live="polite" aria-atomic="true">
         {displayText}
         {!isComplete && <span className="animate-blink">_</span>}
         {isComplete && finalBlinkOnce && <span className="animate-blink-1">_</span>}

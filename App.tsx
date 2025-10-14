@@ -13,6 +13,7 @@ import { ExitScene } from './components/scenes/ExitScene';
 import { NetworkBackground } from './components/effects/NetworkBackground';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { InvestorPage } from './components/scenes/InvestorPage';
+import { SkipButton } from './components/ui/SkipButton';
 
 import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
 import { supabase } from './supabaseClient';
@@ -33,6 +34,7 @@ const AppContent: React.FC = () => {
     const [isTransitioning, setIsTransitioning] = React.useState(false);
     const [animationTrigger, setAnimationTrigger] = React.useState(0);
     const [submissionStatus, setSubmissionStatus] = React.useState<SubmissionStatus>('idle');
+    const [isSkipping, setIsSkipping] = React.useState(false);
     
     const { trackEvent } = useAnalytics();
     const phaseStartTimeRef = React.useRef(Date.now());
@@ -42,7 +44,12 @@ const AppContent: React.FC = () => {
         setAnimationTrigger(count => count + 1);
     }, []);
 
+    const [animationClass, setAnimationClass] = React.useState('animate-fade-in-zoom');
+
     const handlePhaseChange = React.useCallback((newPhase: AppPhase) => {
+        const animations = ['animate-fade-in-zoom', 'animate-slide-in-left'];
+        setAnimationClass(animations[Math.floor(Math.random() * animations.length)]);
+
         const now = Date.now();
         const durationMs = now - phaseStartTimeRef.current;
         
@@ -121,7 +128,7 @@ const AppContent: React.FC = () => {
             case AppPhase.MEMORY_PROMPT_2:
                 return <TypewriterScene text="Is A Click Away." onComplete={() => handlePhaseChange(AppPhase.BRAND_REVEAL)} />;
             case AppPhase.BRAND_REVEAL:
-                return <BrandRevealScene onComplete={() => handlePhaseChange(AppPhase.INVITATION_BOX)} />;
+                return <BrandRevealScene onComplete={() => handlePhaseChange(AppPhase.INVITATION_BOX)} skipToEnd={isSkipping} />;
             case AppPhase.INVITATION_BOX:
                 return <InvitationScene onComplete={handleInvitationComplete} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
             case AppPhase.MEMORY_EXCHANGE:
@@ -149,18 +156,30 @@ const AppContent: React.FC = () => {
     
     const corporatePhases = [AppPhase.INVESTOR_PAGE];
     const isCorporate = corporatePhases.includes(phase);
+
+    const introPhases = [
+        AppPhase.INITIALIZATION,
+        AppPhase.IMAGINE_IF,
+        AppPhase.GLITCH_1,
+        AppPhase.MEMORY_PROMPT_1,
+        AppPhase.MEMORY_PROMPT_2,
+        AppPhase.BRAND_REVEAL,
+    ];
+    const showSkipButton = introPhases.includes(phase) && !isSkipping;
     
     return (
         <main className="h-screen w-screen overflow-hidden">
+            {showSkipButton && <SkipButton onClick={() => { setIsSkipping(true); handlePhaseChange(AppPhase.BRAND_REVEAL); }} />}
             <ErrorBoundary>
                 <div className="relative w-full h-full">
                     {isCorporate ? (
-                        <div key={phase} className="w-full h-full animate-fade-in-zoom">
+                        <div key={phase} className={`w-full h-full ${animationClass}`}>
                             {renderPhase()}
                         </div>
                     ) : (
                         <CRTWrapper videoActive={videoActive}>
                             <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} animationTrigger={animationTrigger} />
+                            <div className="depth-noise-overlay" />
                             <div key={phase} className="w-full h-full animate-fade-in-zoom">
                                 {renderPhase()}
                             </div>
@@ -169,7 +188,7 @@ const AppContent: React.FC = () => {
                 </div>
             </ErrorBoundary>
             <div 
-              className="fixed bottom-2 right-2 md:bottom-6 md:right-6 text-xs text-right text-gray-400 z-[1001] pointer-events-none font-mono" 
+              className="fixed bottom-2 right-2 md:bottom-6 md:right-6 text-xs text-right text-gray-400 z-[1001] pointer-events-none font-mono opacity-50" 
               style={{ textShadow: 'none' }}
             >
               <p>A Platform By: SADOK BOUZAYEN.</p>

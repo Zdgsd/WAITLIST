@@ -3,20 +3,24 @@ import { useTypewriter } from '../../hooks/useTypewriter';
 
 interface SceneProps {
   onComplete: () => void;
+  skipToEnd?: boolean;
 }
 
-export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
-  const { displayText: brandText, isComplete: brandComplete } = useTypewriter("BOOKEENI", 120);
-  const [startTagline, setStartTagline] = React.useState(false);
-  const { displayText: taglineText, isComplete: taglineComplete } = useTypewriter("Connecting You", 140, { enabled: startTagline });
-  const [isGlitching, setIsGlitching] = React.useState(true);
-  const [brandSelected, setBrandSelected] = React.useState(false);
+export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete, skipToEnd = false }) => {
+  const { displayText: brandText, isComplete: brandComplete } = useTypewriter("BOOKEENI", 120, { enabled: !skipToEnd });
+  const [startTagline, setStartTagline] = React.useState(skipToEnd);
+  const { displayText: taglineText, isComplete: taglineComplete } = useTypewriter("Connecting You", 140, { enabled: startTagline && !skipToEnd });
+  const [isGlitching, setIsGlitching] = React.useState(!skipToEnd);
+  const [brandSelected, setBrandSelected] = React.useState(skipToEnd);
   const skipRef = React.useRef(false);
-  const [showSmiley, setShowSmiley] = React.useState(false);
+  const [showSmiley, setShowSmiley] = React.useState(skipToEnd);
 
-  const prefix = brandText.substring(0, 1);
-  const oos = brandText.substring(1, 3);
-  const suffix = brandText.substring(3);
+  const finalBrandComplete = brandComplete || skipToEnd;
+  const finalTaglineComplete = taglineComplete || skipToEnd;
+
+  const prefix = skipToEnd ? 'B' : brandText.substring(0, 1);
+  const oos = skipToEnd ? 'OO' : brandText.substring(1, 3);
+  const suffix = skipToEnd ? 'KEENI' : brandText.substring(3);
 
 
   const handleSkip = React.useCallback((e: MouseEvent | KeyboardEvent) => {
@@ -39,8 +43,7 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
   }, [handleSkip]);
 
   React.useEffect(() => {
-    if (brandComplete) {
-      setIsGlitching(false);
+    if (finalBrandComplete) {
       setBrandSelected(true);
       const smileyTimer = setTimeout(() => setShowSmiley(true), 200);
       return () => {
@@ -64,19 +67,19 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
   }, [brandComplete]);
 
   React.useEffect(() => {
-    if (taglineComplete) {
+    if (finalTaglineComplete) {
       const timer = setTimeout(() => {
           if(!skipRef.current) onComplete();
-      }, 1000); // Shortened delay after removing eye animation
+      }, skipToEnd ? 50 : 1000); // Shortened delay after removing eye animation
       return () => clearTimeout(timer);
     }
-  }, [taglineComplete, onComplete]);
+  }, [finalTaglineComplete, onComplete, skipToEnd]);
 
 
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-6 md:space-y-10 p-4">
       <div className="w-full max-w-[85vw] flex justify-center">
-        <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-[0.12em] sm:tracking-[0.15em] font-normal transition-all duration-300 whitespace-nowrap ${isGlitching ? 'glitch-effect-intense' : ''} ${brandSelected ? 'bg-[var(--terminal-green)] text-black px-2' : ''}`}>
+        <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-[0.12em] sm:tracking-[0.15em] font-normal transition-all duration-300 whitespace-nowrap ${isGlitching ? 'glitch-effect-intense' : ''} ${brandSelected ? 'bg-[var(--terminal-green)] text-white px-2' : ''}`}>
           <span>{prefix}</span>
           <span className="inline-block relative">
               {oos}
@@ -84,8 +87,8 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
                   <svg className="absolute bottom-[-10%] left-0 w-full h-[40%]" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
                       <path
                           d="M 15 30 C 35 50, 65 50, 85 30"
-                          stroke="currentColor"
-                          strokeWidth="5"
+                          stroke="white"
+                          strokeWidth="8"
                           strokeLinecap="round"
                           fill="none"
                           className="animate-draw-smiley"
@@ -99,8 +102,8 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete }) => {
       </div>
       {startTagline && (
         <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center whitespace-nowrap px-4">
-            {taglineText}
-            {!taglineComplete && <span className="animate-blink">_</span>}
+            {skipToEnd ? 'Connecting You' : taglineText}
+            {!taglineComplete && !skipToEnd && <span className="animate-blink">_</span>}
         </p>
       )}
     </div>

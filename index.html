@@ -19,7 +19,7 @@
         --eye-offset: 0;
       }
       body {
-        background-color: var(--terminal-black);
+        background: radial-gradient(ellipse at center, #1c1c24 0%, var(--terminal-black) 70%);
         color: var(--terminal-green);
         font-family: 'Roboto Mono', monospace;
         text-shadow: 0 0 8px rgba(47, 221, 108, 0.4);
@@ -86,7 +86,7 @@
         left: -50%;
         width: 200%;
         height: 200%;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.035"/></svg>');
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.028"/></svg>');
         pointer-events: none;
         z-index: -1;
         animation: animated-noise .2s steps(4, end) infinite;
@@ -123,6 +123,16 @@
       }
       .animate-fade-in-zoom {
         animation: fade-in-zoom 0.7s ease-out forwards;
+      }
+
+      @keyframes slide-in-left {
+        from { transform: translateX(-100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+
+      @keyframes slide-out-right {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
       }
       .screen-border {
         position: fixed;
@@ -161,6 +171,16 @@
         animation: draw-smiley 0.8s ease-out forwards;
         filter: drop-shadow(0 0 8px rgba(47, 221, 108, 0.7));
       }
+      .depth-noise-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><filter id="depthNoise"><feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23depthNoise)" opacity="0.020"/></svg>');
+        pointer-events: none;
+        z-index: 5;
+      }
       @keyframes draw-smiley {
         to {
           stroke-dashoffset: 0;
@@ -178,7 +198,7 @@
         filter: blur(0px);
       }
       .network-canvas.is-moving {
-        filter: blur(3px);
+        filter: blur(2.7px);
       }
       .role-button {
         position: relative;
@@ -235,7 +255,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>

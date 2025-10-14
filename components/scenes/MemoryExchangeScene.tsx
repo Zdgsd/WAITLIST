@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { useTypewriter } from '../../hooks/useTypewriter';
 import { gameQuestions } from '../../gameQuestions';
 import { useAnalytics } from '../../analytics/AnalyticsProvider';
+import { SceneHeader } from '../ui/SceneHeader';
 
 interface MemoryExchangeSceneProps {
   email: string;
@@ -186,13 +187,13 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
   
     return (
       <div>
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 text-green-300 h-10">
-          {titleText}
-          {step === 1 && !titleText.includes('Story?') && <span className="animate-blink">_</span>}
-        </h2>
-        <p className="text-lg text-gray-400 mb-8 h-8">
-          {titleText.length > 0 && "Choose the role that feels right."}
-        </p>
+        <SceneHeader 
+          title={<>
+            {titleText}
+            {step === 1 && !titleText.includes('Story?') && <span className="animate-blink">_</span>}
+          </>}
+          subtitle={titleText.length > 0 && "Choose the role that feels right."}
+        />
         <div className={`transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
           {renderButtons(currentRoles || [])}
           {isSub && (
@@ -280,8 +281,10 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
   const renderConsent = () => {
     return (
         <div className="animate-fade-in">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 text-green-300">One last thing.</h2>
-            <p className="text-lg text-gray-400 mb-8">Your participation helps build our community.</p>
+            <SceneHeader 
+              title="One last thing."
+              subtitle="Your participation helps build our community."
+            />
             <div className="space-y-6">
                 <div className="flex items-center space-x-3 cursor-pointer p-4 bg-gray-900/50 rounded-lg" onClick={() => setMemoryCard(prev => ({...prev, consentGiven: !prev.consentGiven}))}>
                     <input type="checkbox" checked={memoryCard.consentGiven} onChange={e => setMemoryCard(prev => ({ ...prev, consentGiven: e.target.checked }))} className="h-6 w-6 rounded bg-gray-800 border-gray-600 text-[var(--terminal-green)] focus:ring-[var(--terminal-green)]"/>

@@ -46,7 +46,7 @@ export const InvitationScene: React.FC<SceneProps> = ({ onComplete, triggerBackg
 
   return (
     <div className="flex items-center justify-center h-full p-4">
-      <div className="crt-terminal-box p-6 md:p-8 w-full max-w-2xl text-lg sm:text-xl md:text-2xl">
+      <div className="crt-terminal-box p-4 sm:p-6 md:p-8 w-full max-w-2xl text-base sm:text-lg md:text-xl">
         <p>
           {inviteText}
           {!inviteComplete && <span className="animate-blink">_</span>}
@@ -62,7 +62,7 @@ export const InvitationScene: React.FC<SceneProps> = ({ onComplete, triggerBackg
         )}
 
         {showInput && (
-            <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xl md:text-2xl">
+            <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-lg md:text-xl">
               <label htmlFor="email-input" className="whitespace-nowrap">Email:</label>
               <input 
                 id="email-input"
