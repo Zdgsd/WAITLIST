@@ -14,6 +14,7 @@ interface MemoryExchangeSceneProps {
   onSubmit: (data: MemoryCardData) => void;
   onExit: () => void;
   triggerBackgroundAnimation: () => void;
+  onAgeSubmitted: () => void;
 }
 
 type RoleView = 'main' | 'creator' | 'organizer';
@@ -27,7 +28,7 @@ const getWittyComment = (age: number): string => {
   return "A true archivist. We're honored to have your experience.";
 };
 
-const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ email, memoryNumber, onSubmit, onExit, triggerBackgroundAnimation }) => {
+const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ email, memoryNumber, onSubmit, onExit, triggerBackgroundAnimation, onAgeSubmitted }) => {
   const [step, setStep] = React.useState(1);
   const [memoryCard, setMemoryCard] = React.useState<MemoryCardData>({
     role: null,
@@ -58,9 +59,8 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
         if (roleLabel) parts.push(roleLabel.toUpperCase());
     }
     if (memoryCard.name) parts.push(memoryCard.name.toUpperCase());
-    if (memoryCard.age) parts.push(String(memoryCard.age));
     return parts.join(' / ');
-  }, [memoryNumber, memoryCard.role, memoryCard.name, memoryCard.age]);
+  }, [memoryNumber, memoryCard.role, memoryCard.name]);
 
   React.useEffect(() => {
     if (conversationStep === 'post_age_transition') {
@@ -217,7 +217,7 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
           </form>
         )}
         {conversationStep === 'age' && (
-          <form onSubmit={(e) => { e.preventDefault(); if(memoryCard.age) handleConversationSubmit('post_age_transition'); }}>
+          <form onSubmit={(e) => { e.preventDefault(); if(memoryCard.age) { onAgeSubmitted(); handleConversationSubmit('post_age_transition'); } }}>
              <label htmlFor="age-input" className="block mb-4">{agePrompt}{!agePrompt.includes('?') &&<span className="animate-blink">_</span>}</label>
             <input id="age-input" type="number" value={memoryCard.age || ''} onChange={e => setMemoryCard(p => ({...p, age: parseInt(e.target.value) || null}))} autoFocus className="w-full bg-transparent focus:outline-none border-b-2 border-[var(--terminal-green)]/50 focus:border-[var(--terminal-green)] transition-colors text-2xl md:text-3xl"/>
             <Button type="submit" className="mt-6" disabled={!memoryCard.age}>Next</Button>

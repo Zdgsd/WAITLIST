@@ -9,6 +9,9 @@ import { BrandRevealScene } from './components/scenes/BrandRevealScene';
 import { InvitationScene } from './components/scenes/InvitationScene';
 import { MemoryExchangeScene } from './components/scenes/MemoryExchangeScene';
 import { CompletionScene } from './components/scenes/CompletionScene';
+import { ChatScene } from './components/scenes/ChatScene';
+import { ChatLoginScene } from './components/scenes/ChatLoginScene';
+import ChatOverlay from './components/scenes/ChatOverlay';
 import { ExitScene } from './components/scenes/ExitScene';
 import { NetworkBackground } from './components/effects/NetworkBackground';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -35,7 +38,12 @@ const AppContent: React.FC = () => {
     const [animationTrigger, setAnimationTrigger] = React.useState(0);
     const [submissionStatus, setSubmissionStatus] = React.useState<SubmissionStatus>('idle');
     const [isSkipping, setIsSkipping] = React.useState(false);
-    
+    const [showChatIcon, setShowChatIcon] = React.useState(true);
+    const [showChatModal, setShowChatModal] = React.useState(false);
+    const [chatNickname, setChatNickname] = React.useState('');
+    const [chatSessionId, setChatSessionId] = React.useState<number | null>(null);
+    const [chatUserRole, setChatUserRole] = React.useState('');
+
     const { trackEvent } = useAnalytics();
     const phaseStartTimeRef = React.useRef(Date.now());
     const previousPhaseRef = React.useRef<AppPhase>(AppPhase.CORPORATE_SHELL);
@@ -62,6 +70,8 @@ const AppContent: React.FC = () => {
         previousPhaseRef.current = newPhase;
         setPhase(newPhase);
         triggerBackgroundAnimation();
+
+        // Removed conditional setShowChatIcon(true) from here
     }, [trackEvent]);
 
     React.useEffect(() => {
@@ -96,6 +106,7 @@ const AppContent: React.FC = () => {
     const handleMemorySubmit = (data: MemoryCardData) => {
         setMemoryData(data);
         setSubmissionStatus('idle'); // Reset status for this new submission
+        // setShowChatIcon(true); // Removed from here
         handlePhaseChange(AppPhase.COMPLETION);
     };
 
@@ -103,12 +114,26 @@ const AppContent: React.FC = () => {
         setMemoryData(prev => ({ ...prev, email }));
         handlePhaseChange(AppPhase.MEMORY_EXCHANGE);
     };
+
+    const handleAgeSubmitted = () => {
+        // This is now handled by default
+    };
+
+    React.useEffect(() => {
+        setChatSessionId(Math.floor(10000 + Math.random() * 90000)); // Generate a random 5-digit ID
+    }, []);
     
     React.useEffect(() => {
         if (phase === AppPhase.MEMORY_EXCHANGE && !memoryNumber) {
           setMemoryNumber(Math.floor(10000 + Math.random() * 90000));
         }
       }, [phase, memoryNumber]);
+
+    const handleChatLogin = (nickname: string, userRole: string) => {
+      setChatNickname(nickname);
+      setChatUserRole(userRole);
+      setShowChatModal(true);
+    };
 
     const renderPhase = () => {
         switch (phase) {
@@ -132,12 +157,13 @@ const AppContent: React.FC = () => {
             case AppPhase.INVITATION_BOX:
                 return <InvitationScene onComplete={handleInvitationComplete} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
             case AppPhase.MEMORY_EXCHANGE:
-                return <MemoryExchangeScene email={memoryData.email} memoryNumber={memoryNumber} onSubmit={handleMemorySubmit} onExit={() => handlePhaseChange(AppPhase.EXIT)} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
+                return <MemoryExchangeScene email={memoryData.email} memoryNumber={memoryNumber} onSubmit={handleMemorySubmit} onExit={() => handlePhaseChange(AppPhase.EXIT)} triggerBackgroundAnimation={triggerBackgroundAnimation} onAgeSubmitted={handleAgeSubmitted} />;
             case AppPhase.COMPLETION:
                 return memoryData && memoryNumber ? <CompletionScene 
                   data={memoryData} 
                   memoryNumber={memoryNumber} 
                   onNavigateToInvestors={() => handlePhaseChange(AppPhase.INVESTOR_PAGE)} 
+                  onOpenChatModal={() => setShowChatModal(true)}
                   status={submissionStatus}
                   setStatus={setSubmissionStatus}
                   triggerBackgroundAnimation={triggerBackgroundAnimation}
@@ -166,12 +192,23 @@ const AppContent: React.FC = () => {
         AppPhase.BRAND_REVEAL,
     ];
     const showSkipButton = introPhases.includes(phase) && !isSkipping;
-    
+
     return (
         <main className="h-screen w-screen overflow-hidden">
-            {showSkipButton && <SkipButton onClick={() => { setIsSkipping(true); handlePhaseChange(AppPhase.BRAND_REVEAL); }} />}
+            {showSkipButton && <SkipButton onClick={() => { setIsSkipping(true); handlePhaseChange(AppPhase.BRAND_REVEAL); }} />} 
             <ErrorBoundary>
                 <div className="relative w-full h-full">
+                    {showChatIcon && !showSkipButton && !showChatModal && !chatNickname && (
+                        <button 
+                            onClick={() => setShowChatModal(true)}
+                            className="fixed top-4 right-4 z-[1002] p-2 transition-opacity hover:opacity-80"
+                            aria-label="Open Chat"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[var(--terminal-green)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </button>
+                    )}
                     {isCorporate ? (
                         <div key={phase} className={`w-full h-full ${animationClass}`}>
                             {renderPhase()}
@@ -185,10 +222,31 @@ const AppContent: React.FC = () => {
                             </div>
                         </CRTWrapper>
                     )}
+                    {showChatModal && !chatNickname && (
+                        <ChatLoginScene onLogin={handleChatLogin} onClose={() => {
+                          setShowChatModal(false);
+                          setChatNickname(''); // Reset nickname
+                          setChatUserRole(''); // Reset user role
+                          console.log('ChatLoginScene closed. showChatModal:', false, 'chatNickname:', '');
+                        }} />
+                    )}
+                    {showChatModal && chatNickname && chatSessionId && chatUserRole && (
+                        <ChatOverlay
+                            chatNickname={chatNickname}
+                            chatSessionId={chatSessionId}
+                            userRole={chatUserRole}
+                            onClose={() => {
+                              setShowChatModal(false);
+                              setChatNickname(''); // Reset nickname
+                              setChatUserRole(''); // Reset user role
+                              console.log('ChatOverlay closed. showChatModal:', false, 'chatNickname:', '');
+                            }}
+                        />
+                    )}
                 </div>
             </ErrorBoundary>
             <div 
-              className="fixed bottom-2 right-2 md:bottom-6 md:right-6 text-xs text-right text-gray-400 z-[1001] pointer-events-none font-mono opacity-50" 
+              className={`fixed bottom-2 right-2 md:bottom-6 md:right-6 text-xs text-right text-gray-400 z-[1001] pointer-events-none font-mono opacity-50 ${showChatModal ? 'hidden' : ''}`} 
               style={{ textShadow: 'none' }}
             >
               <p>A Platform By: SADOK BOUZAYEN.</p>

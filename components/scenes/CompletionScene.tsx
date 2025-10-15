@@ -12,12 +12,13 @@ interface CompletionSceneProps {
   data: MemoryCardData;
   memoryNumber: number;
   onNavigateToInvestors: () => void;
+  onOpenChatModal: () => void;
   status: SubmissionStatus;
   setStatus: (status: SubmissionStatus) => void;
   triggerBackgroundAnimation: () => void;
 }
 
-const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memoryNumber, onNavigateToInvestors, status, setStatus, triggerBackgroundAnimation }) => {
+const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memoryNumber, onNavigateToInvestors, onOpenChatModal, status, setStatus, triggerBackgroundAnimation }) => {
   const [userCount, setUserCount] = React.useState<number | null>(null);
   const [isJoinTeamModalOpen, setJoinTeamModalOpen] = React.useState(false);
   const { trackEvent } = useAnalytics();
@@ -149,8 +150,14 @@ const CompletionSceneComponent: React.FC<CompletionSceneProps> = ({ data, memory
                 <Button variant="primary" onClick={handleButtonClick} className="animate-pulse-glow text-xl px-6 py-3 mb-4">
                   Interested in Helping?
                 </Button>
-                <div className="mt-8">
-                  <Button variant="secondary" onClick={() => setJoinTeamModalOpen(true)} className="text-lg px-5 py-2.5">
+                <div className="mt-8 flex justify-center items-center gap-4">
+                  <Button variant="secondary" onClick={() => {
+                    trackEvent('click', { element_id: 'navigate_to_chat' });
+                    onOpenChatModal();
+                  }}>
+                    Join Community Chat
+                  </Button>
+                  <Button variant="secondary" onClick={() => setJoinTeamModalOpen(true)}>
                     Join Our Team
                   </Button>
                 </div>
