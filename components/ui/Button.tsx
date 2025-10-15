@@ -5,7 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'terminal';
 }
 
-const ButtonComponent: React.FC<ButtonProps> = ({ children, variant = 'primary', className, ...props }) => {
+const ButtonComponent: React.FC<ButtonProps> = ({ children, variant = 'primary', className, type = 'button', ...props }) => {
   const baseClasses = 'px-4 py-2 text-xl transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variantClasses = {
@@ -15,7 +15,7 @@ const ButtonComponent: React.FC<ButtonProps> = ({ children, variant = 'primary',
   };
 
   return (
-    <button className={`${baseClasses} ${variantClasses[variant]} ${className}`} {...props}>
+    <button className={`${baseClasses} ${variantClasses[variant]} ${className}`} type={type} {...props}>
       {children}
     </button>
   );

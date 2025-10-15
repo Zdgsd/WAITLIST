@@ -12,23 +12,25 @@ export const useTypewriter = (text: string, speed: number = 100, options: Typewr
 
   React.useEffect(() => {
     const handleSkip = (e: MouseEvent | KeyboardEvent) => {
-      // FIX: Do not intercept clicks on interactive elements. This was blocking buttons.
-      if (e.target instanceof HTMLElement && e.target.closest('button, a, input, [role="button"]')) {
-        return;
+      // ONLY skip if clicking on non-interactive background
+      if (e.target instanceof HTMLElement) {
+        const interactiveElements = e.target.closest('button, a, input, select, textarea, [role="button"], [onClick]');
+        if (interactiveElements) {
+          return; // Don't skip when clicking interactive elements
+        }
       }
       
       if (!isComplete) {
-        e.stopImmediatePropagation();
         skipRef.current = true;
       }
     };
     
     const eventListener = handleSkip as EventListener;
-    window.addEventListener('click', eventListener, { capture: true }); // Use capture to catch event early
-    window.addEventListener('keydown', eventListener, { capture: true });
+    window.addEventListener('click', eventListener);
+    window.addEventListener('keydown', eventListener);
     return () => {
-      window.removeEventListener('click', eventListener, { capture: true });
-      window.removeEventListener('keydown', eventListener, { capture: true });
+      window.removeEventListener('click', eventListener);
+      window.removeEventListener('keydown', eventListener);
     };
   }, [isComplete]);
 
