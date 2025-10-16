@@ -16,6 +16,7 @@ export const CRTWrapper: React.FC<{ children: React.ReactNode; videoActive: bool
       <div className="screen-border" />
       <div className="white-noise-overlay" />
       <div className="scanline-overlay" />
+      <div className="depth-noise-overlay" />
       
       <div className="relative z-10 w-full h-full">
         {children}
@@ -24,14 +25,14 @@ export const CRTWrapper: React.FC<{ children: React.ReactNode; videoActive: bool
       <div 
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
         style={{
-          boxShadow: 'inset 0 0 10vw 3vw var(--terminal-black)',
+          boxShadow: 'inset 0 0 1.274vw 0.3822vw var(--terminal-black)',
           zIndex: 98,
         }}
       />
       <div 
         className="absolute top-0 left-0 w-full h-full pointer-events-none"
         style={{
-          boxShadow: 'inset 0 0 100px rgba(0,0,0,0.75)',
+          boxShadow: 'inset 0 0 31px rgba(0,0,0,0.525)',
           zIndex: 99,
         }}
       />

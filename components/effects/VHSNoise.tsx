@@ -7,7 +7,7 @@ interface VHSNoiseProps {
 }
 
 export const VHSNoise: React.FC<VHSNoiseProps> = ({
-  intensity = 0.08,
+  intensity = 0.0336,
   isTransitioning = false,
   animationTrigger = 0
 }) => {
@@ -112,7 +112,7 @@ export const VHSNoise: React.FC<VHSNoiseProps> = ({
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-[98] mix-blend-screen"
       style={{
-        opacity: 0.4,
+        opacity: 0.144,
         filter: 'contrast(1.2)'
       }}
     />

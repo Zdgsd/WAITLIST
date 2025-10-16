@@ -218,7 +218,7 @@ const AppContent: React.FC = () => {
                         <CRTWrapper videoActive={videoActive}>
                             <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} animationTrigger={animationTrigger} />
                             <VHSNoise
-                                intensity={0.08}
+                                intensity={0.056}
                                 isTransitioning={isTransitioning}
                                 animationTrigger={animationTrigger}
                             />

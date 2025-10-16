@@ -31,7 +31,7 @@ export const InvestorModal: React.FC<InvestorModalProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-[var(--terminal-black)]/80 backdrop-blur-sm z-[2000] flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-[var(--terminal-black)]/95 backdrop-blur-sm z-[2000] flex items-center justify-center p-4 animate-fade-in">
             <div className="crt-terminal-box w-full max-w-3xl h-[90vh] flex flex-col p-6 md:p-8 relative">
                 <div className="absolute top-4 right-4">
                     <Button onClick={onClose} variant="terminal" className="text-2xl">

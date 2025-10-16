@@ -61,15 +61,21 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       if (!isMountedRef.current) return;
       particlesArrayRef.current = [];
       const isMobile = window.innerWidth < 768;
-      const density = isMobile ? 2000 : 1000;
+      const density = isMobile ? 2760 : 1380;
       const numberOfParticles = Math.min(
-        isMobile ? 180 : 250,
+        isMobile ? 250 : 400,
         Math.max(120, (canvas.height * canvas.width) / density)
       );
       for (let i = 0; i < numberOfParticles; i++) {
-        const size = Math.random() * (isMobile ? 2.5 : 3.5) + 2;
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
+        const size = Math.random() * (isMobile ? 3 : 4) + 2.5;
+        
+        const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+        const angle = i * goldenAngle;
+        const radius = Math.sqrt(i / numberOfParticles) * (Math.min(canvas.width, canvas.height) / 2) * 0.9;
+
+        const x = canvas.width / 2 + Math.cos(angle) * radius;
+        const y = canvas.height / 2 + Math.sin(angle) * radius;
+
         const directionX = ((Math.random() * 1.2) - 0.6) * 0.8;
         const directionY = ((Math.random() * 1.2) - 0.6) * 0.8;
         const pulseOffset = Math.random() * Math.PI * 2;
@@ -88,7 +94,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
 
     const connect = (burstProgress: number, time: number) => {
       if (!isMountedRef.current) return;
-      const baseDistance = Math.min(canvas.width, canvas.height) / 7;
+      const baseDistance = Math.min(canvas.width, canvas.height) / 9;
       const connectDistance = baseDistance * (1 + burstProgress * 0.8);
 
       for (let a = 0; a < particlesArrayRef.current.length; a++) {
@@ -143,6 +149,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
       const particles = particlesArrayRef.current;
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
@@ -200,7 +207,18 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     };
   }, []);
 
-  return <canvas ref={canvasRef} className={`network-canvas ${isTransitioning ? 'is-moving' : ''}`} style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }} />;
+  return <canvas 
+    ref={canvasRef} 
+    className={`network-canvas ${isTransitioning ? 'is-moving' : ''}`} 
+    style={{ 
+      transform: `translate(${offset.x}px, ${offset.y}px)`,
+      position: 'fixed',
+      left: '-50%',
+      top: '-50%',
+      width: '200%',
+      height: '200%',
+    }}
+  />;
 };
 
 export const NetworkBackground = React.memo(NetworkBackgroundComponent);

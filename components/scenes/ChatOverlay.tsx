@@ -40,7 +40,7 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
           }}
         >
           {/* Semi-transparent overlay that shows background */}
-          <div className="absolute inset-0 bg-black/20" onClick={handleClose} />
+          <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
           
           {/* Chat container with glass effect */}
           <motion.div
@@ -54,7 +54,7 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({
               <div className="absolute inset-0 opacity-20" />
               
               {/* Main chat container with glass morphism */}
-              <div className="relative w-full h-full bg-black/60 backdrop-blur-md border border-[var(--terminal-green)]/30 rounded-lg overflow-hidden crt-terminal-box">
+              <div className="relative w-full h-full bg-black/80 backdrop-blur-md border border-[var(--terminal-green)]/30 rounded-lg overflow-hidden crt-terminal-box">
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--terminal-green)]/5 to-transparent" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[var(--terminal-green)]/10 via-transparent to-transparent" />
                 

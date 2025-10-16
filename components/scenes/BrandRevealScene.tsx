@@ -79,7 +79,7 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete, skipToEnd =
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-6 md:space-y-10 p-4">
       <div className="w-full max-w-[85vw] flex justify-center">
-        <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-[0.12em] sm:tracking-[0.15em] font-normal transition-all duration-300 whitespace-nowrap ${isGlitching ? 'glitch-effect-intense' : ''} ${brandSelected ? 'bg-[var(--terminal-green)] text-white px-2' : ''}`}>
+        <h1 className={`text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-[0.12em] sm:tracking-[0.15em] font-normal transition-all duration-300 whitespace-nowrap ${isGlitching ? 'glitch-effect-intense' : ''} ${brandSelected ? 'px-2' : ''}`}>
           <span>{prefix}</span>
           <span className="inline-block relative">
               {oos}
