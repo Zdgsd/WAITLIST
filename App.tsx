@@ -14,6 +14,7 @@ import { ChatLoginScene } from './components/scenes/ChatLoginScene';
 import ChatOverlay from './components/scenes/ChatOverlay';
 import { ExitScene } from './components/scenes/ExitScene';
 import { NetworkBackground } from './components/effects/NetworkBackground';
+import { VHSNoise } from './components/effects/VHSNoise';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { InvestorPage } from './components/scenes/InvestorPage';
 import { SkipButton } from './components/ui/SkipButton';
@@ -216,6 +217,11 @@ const AppContent: React.FC = () => {
                     ) : (
                         <CRTWrapper videoActive={videoActive}>
                             <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} animationTrigger={animationTrigger} />
+                            <VHSNoise
+                                intensity={0.08}
+                                isTransitioning={isTransitioning}
+                                animationTrigger={animationTrigger}
+                            />
                             <div className="depth-noise-overlay" />
                             <div key={phase} className="w-full h-full animate-fade-in-zoom">
                                 {renderPhase()}
