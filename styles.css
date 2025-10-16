@@ -71,3 +71,17 @@ body {
     opacity: 0.9;
   }
 }
+
+.network-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 30% 40%, rgba(45, 50, 70, 1) 0%, rgba(25, 28, 40, 1) 35%, rgba(15, 18, 25, 1) 70%, rgba(10, 12, 18, 1) 100%);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  scale: 0.5;
+}
+
+.network-canvas.is-moving {
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

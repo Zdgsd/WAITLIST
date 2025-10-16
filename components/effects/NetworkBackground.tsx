@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 
-const WARM_HIGHLIGHT = 'rgba(255, 180, 90, 0.9)';
-const NODE_COLOR = 'rgba(200, 200, 200, 0.5)';
+const WARM_HIGHLIGHT = 'rgba(255, 180, 90, 1)';
+const NODE_COLOR = 'rgba(220, 220, 230, 0.95)';
+const ACCENT_BLUE = 'rgba(100, 150, 255, 0.9)';
+const ACCENT_TEAL = 'rgba(80, 200, 200, 0.9)';
 
 interface Particle {
   x: number;
@@ -12,6 +14,8 @@ interface Particle {
   color: string;
   isHighlight: boolean;
   speedMultiplier: number;
+  pulseOffset: number;
+  accentType: number;
 }
 
 interface NetworkBackgroundProps {
@@ -57,27 +61,35 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       if (!isMountedRef.current) return;
       particlesArrayRef.current = [];
       const isMobile = window.innerWidth < 768;
-      const density = isMobile ? 3000 : 1500;
+      const density = isMobile ? 2000 : 1000;
       const numberOfParticles = Math.min(
-        isMobile ? 100 : 150,
-        Math.max(60, (canvas.height * canvas.width) / density)
+        isMobile ? 180 : 250,
+        Math.max(120, (canvas.height * canvas.width) / density)
       );
       for (let i = 0; i < numberOfParticles; i++) {
-        const size = Math.random() * (isMobile ? 1.8 : 2.2) + 1;
+        const size = Math.random() * (isMobile ? 2.5 : 3.5) + 2;
         const x = Math.random() * canvas.width;
         const y = Math.random() * canvas.height;
-        const directionX = (Math.random() * 0.6) - 0.3;
-        const directionY = (Math.random() * 0.6) - 0.3;
-        const isHighlight = Math.random() < 0.08;
-        const color = isHighlight ? WARM_HIGHLIGHT : NODE_COLOR;
+        const directionX = (Math.random() * 1.2) - 0.6;
+        const directionY = (Math.random() * 1.2) - 0.6;
+        const pulseOffset = Math.random() * Math.PI * 2;
+        const accentType = Math.random();
+        const isHighlight = Math.random() < 0.15;
+        let color = NODE_COLOR;
+        if (isHighlight) {
+          if (accentType < 0.4) color = WARM_HIGHLIGHT;
+          else if (accentType < 0.7) color = ACCENT_BLUE;
+          else color = ACCENT_TEAL;
+        }
 
-        particlesArrayRef.current.push({ x, y, directionX, directionY, size, color, isHighlight, speedMultiplier: 1 });
+        particlesArrayRef.current.push({ x, y, directionX, directionY, size, color, isHighlight, speedMultiplier: 1, pulseOffset, accentType });
       }
     };
 
-    const connect = (burstProgress: number) => {
+    const connect = (burstProgress: number, time: number) => {
       if (!isMountedRef.current) return;
-      const connectDistance = (Math.min(canvas.width, canvas.height) / 10) * (1 + burstProgress * 0.5);
+      const baseDistance = Math.min(canvas.width, canvas.height) / 7;
+      const connectDistance = baseDistance * (1 + burstProgress * 0.8);
 
       for (let a = 0; a < particlesArrayRef.current.length; a++) {
         for (let b = a + 1; b < particlesArrayRef.current.length; b++) {
@@ -90,13 +102,23 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
             const fromParticle = particlesArrayRef.current[a];
             const toParticle = particlesArrayRef.current[b];
 
-            let strokeStyle = `rgba(200, 200, 200, ${opacityValue * 0.5 * (1 + burstProgress * 0.5)})`;
+            const shimmer = Math.sin(time * 0.003 + distance * 0.01) * 0.15 + 0.85;
+            let strokeStyle = `rgba(180, 180, 200, ${opacityValue * 0.6 * shimmer * (1 + burstProgress * 0.6)})`;
+            let lineWidth = 1.2;
+
             if (fromParticle.isHighlight || toParticle.isHighlight) {
-              strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.7 * (1 + burstProgress * 0.5)})`;
+              if (fromParticle.accentType < 0.4 || toParticle.accentType < 0.4) {
+                strokeStyle = `rgba(255, 180, 90, ${opacityValue * 0.85 * shimmer * (1 + burstProgress * 0.7)})`;
+              } else if (fromParticle.accentType < 0.7 || toParticle.accentType < 0.7) {
+                strokeStyle = `rgba(100, 150, 255, ${opacityValue * 0.8 * shimmer * (1 + burstProgress * 0.7)})`;
+              } else {
+                strokeStyle = `rgba(80, 200, 200, ${opacityValue * 0.8 * shimmer * (1 + burstProgress * 0.7)})`;
+              }
+              lineWidth = 1.5;
             }
 
             ctx.strokeStyle = strokeStyle;
-            ctx.lineWidth = 1;
+            ctx.lineWidth = lineWidth;
             ctx.beginPath();
             ctx.moveTo(fromParticle.x, fromParticle.y);
             ctx.lineTo(toParticle.x, toParticle.y);
@@ -109,9 +131,10 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
     const animate = () => {
       if (!isMountedRef.current) return;
 
+      const time = Date.now();
       let burstProgress = 0;
       if (burstState.current.active) {
-        const elapsed = Date.now() - burstState.current.started;
+        const elapsed = time - burstState.current.started;
         if (elapsed < burstState.current.duration) {
           burstProgress = Math.sin((elapsed / burstState.current.duration) * Math.PI);
         } else {
@@ -125,16 +148,25 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
         const p = particles[i];
         const speedMultiplier = 1 + burstProgress * 4;
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2, false);
+        const pulse = Math.sin(time * 0.002 + p.pulseOffset) * 0.3 + 1;
+        const animatedSize = p.size * pulse;
 
-        ctx.shadowColor = p.isHighlight ? WARM_HIGHLIGHT : 'rgba(200, 200, 200, 0.5)';
-        ctx.shadowBlur = p.isHighlight ? 15 : 5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, animatedSize, 0, Math.PI * 2, false);
+
+        if (p.isHighlight) {
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 20 + Math.sin(time * 0.003 + p.pulseOffset) * 8;
+        } else {
+          ctx.shadowColor = 'rgba(220, 220, 230, 0.6)';
+          ctx.shadowBlur = 8;
+        }
         ctx.fillStyle = p.color;
         ctx.fill();
 
-        p.x += p.directionX * speedMultiplier;
-        p.y += p.directionY * speedMultiplier;
+        const wobble = Math.sin(time * 0.001 + p.pulseOffset) * 0.1;
+        p.x += (p.directionX + wobble) * speedMultiplier;
+        p.y += (p.directionY + wobble) * speedMultiplier;
 
         if (p.x > canvas.width + p.size) p.x = -p.size;
         else if (p.x < -p.size) p.x = canvas.width + p.size;
@@ -143,7 +175,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ offset, 
       }
 
       ctx.shadowBlur = 0;
-      connect(burstProgress);
+      connect(burstProgress, time);
       animationFrameId.current = requestAnimationFrame(animate);
     };
 
