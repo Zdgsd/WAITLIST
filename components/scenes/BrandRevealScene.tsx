@@ -45,10 +45,9 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete, skipToEnd =
   React.useEffect(() => {
     if (finalBrandComplete) {
       setBrandSelected(true);
+      setIsGlitching(false); // Stop glitching when complete
       const smileyTimer = setTimeout(() => setShowSmiley(true), 200);
-      return () => {
-        clearTimeout(smileyTimer);
-      };
+      return () => clearTimeout(smileyTimer);
     }
 
     const glitchInterval = setInterval(() => {
@@ -56,7 +55,7 @@ export const BrandRevealScene: React.FC<SceneProps> = ({ onComplete, skipToEnd =
     }, 50);
 
     return () => clearInterval(glitchInterval);
-  }, [brandComplete]);
+  }, [finalBrandComplete]);
 
 
   React.useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 const WARM_HIGHLIGHT = 'rgba(255, 180, 90, 1)';
 const NODE_COLOR = 'rgba(220, 220, 230, 0.95)';
@@ -34,6 +34,31 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
   const particlesArrayRef = useRef<Particle[]>([]);
   const isMountedRef = useRef(true);
   const burstState = useRef({ active: false, duration: 0, started: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Add mouse interaction
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ 
+        x: (e.clientX / window.innerWidth) * 2 - 1,
+        y: -(e.clientY / window.innerHeight) * 2 + 1
+      });
+    };
+
+    const handleMouseEnter = () => setIsHovering(true);
+    const handleMouseLeave = () => setIsHovering(false);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseenter', handleMouseEnter);
+    window.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseenter', handleMouseEnter);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
   
   // Performance optimization: throttle animation frames
   const fps = 60;
@@ -102,6 +127,25 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
     }
   }, []);
 
+  // Add particle trail effect
+  const drawParticleTrails = (ctx: CanvasRenderingContext2D, particles: Particle[]) => {
+    particles.forEach(particle => {
+      if (particle.isHighlight) {
+        const gradient = ctx.createRadialGradient(
+          particle.x, particle.y, 0,
+          particle.x, particle.y, particle.size * 8
+        );
+        gradient.addColorStop(0, particle.color.replace(/, (\d|\.)+\)/, ', 0.5)'));
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+  };
+
   const animate = useCallback(() => {
     if (!isMountedRef.current) return;
 
@@ -129,15 +173,34 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
+      const particles = particlesArrayRef.current;
+
+      // Add mouse influence to particles
+      particles.forEach(particle => {
+        const dx = particle.x - (mousePosition.x * canvas.width / 2 + canvas.width / 2);
+        const dy = particle.y - (mousePosition.y * canvas.height / 2 + canvas.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 200 && isHovering) {
+          // Repel particles from mouse
+          const force = (200 - distance) / 200;
+          particle.x += (dx / distance) * force * 2;
+          particle.y += (dy / distance) * force * 2;
+        }
+      });
+
       // Update and draw particles
-      calculateParticlePositions(particlesArrayRef.current, canvas, burstProgress, time);
+      calculateParticlePositions(particles, canvas, burstProgress, time);
       
+      // Draw particle trails
+      drawParticleTrails(ctx, particles);
+
       // Draw connections
-      drawConnections(ctx, particlesArrayRef.current, burstProgress, time);
+      drawConnections(ctx, particles, burstProgress, time);
     }
 
     animationFrameId.current = requestAnimationFrame(animate);
-  }, [calculateParticlePositions, drawConnections, interval]);
+  }, [calculateParticlePositions, drawConnections, interval, isHovering, mousePosition.x, mousePosition.y]);
 
   // Reduce particle count based on screen size
   const calculateOptimalParticleCount = useCallback((width: number, height: number) => {

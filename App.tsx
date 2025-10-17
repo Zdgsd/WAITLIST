@@ -7,6 +7,9 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { SkipButton } from './components/ui/SkipButton';
 import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
 import { supabase } from './supabaseClient';
+import { LensFlares } from './components/effects/LensFlares';
+import { DynamicGradient } from './components/effects/DynamicGradient';
+import { SceneTransition } from './components/effects/SceneTransition';
 
 // Lazy load scene components
 const CorporateShell = React.lazy(() => import('./components/scenes/CorporateShell').then(module => ({ default: module.CorporateShell })));
@@ -78,7 +81,7 @@ const AppContent: React.FC = () => {
         triggerBackgroundAnimation();
 
         // Removed conditional setShowChatIcon(true) from here
-    }, [trackEvent]);
+    }, [trackEvent, triggerBackgroundAnimation]);
 
     React.useEffect(() => {
         if (phase === AppPhase.CORPORATE_SHELL && animationTrigger === 0) {
@@ -253,9 +256,13 @@ const AppContent: React.FC = () => {
 
     return (
         <main className="h-screen w-screen overflow-hidden">
+            <LensFlares intensity={0.2} />
+            <DynamicGradient phase={phase.toString()} />
+            <SceneTransition isTransitioning={isTransitioning} />
+
             {showSkipButton && <SkipButton onClick={() => { setIsSkipping(true); handlePhaseChange(AppPhase.BRAND_REVEAL); }} />} 
             <ErrorBoundary>
-                <div className="relative w-full h-full">
+                <div className={`relative w-full h-full ${isCorporate ? '' : 'floating-element-slow'}`}>
                     {showChatIcon && !showSkipButton && !showChatModal && !chatNickname && (
                         <button 
                             onClick={() => setShowChatModal(true)}
@@ -319,6 +326,8 @@ const AppContent: React.FC = () => {
               <p>A Platform By: SADOK BOUZAYEN.</p>
               <p>Bookeeni.contact@gmail.com</p>
             </div>
+            <div className="crt-scanlines" />
+            <div className="screen-curvature" />
         </main>
     );
 };
