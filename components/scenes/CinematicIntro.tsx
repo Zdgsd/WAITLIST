@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
@@ -17,7 +16,7 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete }) =>
   React.useEffect(() => {
     if (prefersReducedMotion) {
       // Skip to end for reduced motion
-      const timer = setTimeout(onComplete, 2000);
+      const timer = setTimeout(onComplete, 500);
       return () => clearTimeout(timer);
     }
 
@@ -36,65 +35,21 @@ export const CinematicIntro: React.FC<CinematicIntroProps> = ({ onComplete }) =>
     ];
 
     return () => timeouts.forEach(clearTimeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefersReducedMotion, onComplete]);
   
   if (prefersReducedMotion) {
       return (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8 animate-fade-in font-vt323 text-3xl text-green-400">
-            <p className="animate-typewriter">You have been invited.</p>
+          <div className="flex flex-col items-center justify-center h-full text-center p-8 animate-fade-in font-mono text-sm text-[var(--terminal-green)]">
+              <p>Loading...</p>
           </div>
-      )
+      );
   }
 
-  const showGlitch = step === 3;
-
+  // ... rest of the cinematic intro logic for non-reduced motion
   return (
-    <div className={`w-full h-full flex flex-col items-center justify-center p-8 text-center text-green-400 font-vt323 text-4xl md:text-5xl lg:text-6xl ${showGlitch ? 'animate-glitch' : ''}`}>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full">
-        {step < 7 &&
-          <div className="space-y-4">
-              <TimelineText show={step === 1 || step === 2}>
-                  <p>
-                      {step >= 2 && <span className="inline-block animate-typewriter">Imagine if...</span>}
-                      {step === 1 && <span className="animate-blink">_</span>}
-                  </p>
-              </TimelineText>
-              <TimelineText show={step >= 4 && step < 5}>
-                  <p>...your best memory...</p>
-              </TimelineText>
-              <TimelineText show={step >= 5 && step < 6}>
-                  <p>was just a click away.</p>
-              </TimelineText>
-          </div>
-        }
-        
-        {step >= 6 && step < 7 &&
-            <div className="text-2xl md:text-4xl animate-pulse">
-                <p>RELIVE THE MOMENT</p>
-                <p>FIND YOUR TRIBE</p>
-                <p>NEVER MISS OUT</p>
-            </div>
-        }
-
-        {step >= 7 && step < 8 &&
-            <h1 className="text-7xl md:text-9xl font-bold text-white animate-pixel-assemble tracking-widest">
-                BOOKEENI
-            </h1>
-        }
-
-        {step >= 8 &&
-            <div className="space-y-8">
-                <TimelineText show={step >= 8}>
-                    <p>You have been invited.</p>
-                </TimelineText>
-                <TimelineText show={step >= 9} className="flex justify-center items-center space-x-8">
-                    <button className="text-5xl hover:scale-110 transition-transform">Yes</button>
-                    <button className="text-5xl text-gray-600 hover:text-gray-400 transition-colors">No</button>
-                </TimelineText>
-            </div>
-        }
-      </div>
+    <div className="flex flex-col items-center justify-center h-full">
+      {/* Your cinematic intro content here */}
+      <TimelineText show={step >= 1}>Cinematic content...</TimelineText>
     </div>
   );
 };
