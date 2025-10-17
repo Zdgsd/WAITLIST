@@ -71,11 +71,10 @@ export const VHSNoise: React.FC<VHSNoiseProps> = ({
       const canvas = canvasRef.current;
       if (!canvas) return;
       
-      // Reduce canvas size on mobile for better performance
-      const isMobile = window.innerWidth < 768;
-      const scale = isMobile ? 1 : 1;
-      canvas.width = window.innerWidth * scale;
-      canvas.height = window.innerHeight * scale;
+      const maxWidth = 1920;
+      const maxHeight = 1080;
+      canvas.width = Math.min(window.innerWidth, maxWidth);
+      canvas.height = Math.min(window.innerHeight, maxHeight);
     }, 100);
   }, []);
 
@@ -87,11 +86,10 @@ export const VHSNoise: React.FC<VHSNoiseProps> = ({
     const ctx = canvas.getContext('2d', { willReadFrequently: false });
     if (!ctx) return;
 
-    // Set initial size
-    const isMobile = window.innerWidth < 768;
-    const scale = isMobile ? 1 : 1;
-    canvas.width = window.innerWidth * scale;
-    canvas.height = window.innerHeight * scale;
+    const maxWidth = 1920;
+    const maxHeight = 1080;
+    canvas.width = Math.min(window.innerWidth, maxWidth);
+    canvas.height = Math.min(window.innerHeight, maxHeight);
 
     generateNoise();
 

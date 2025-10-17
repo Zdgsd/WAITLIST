@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 
 const WARM_HIGHLIGHT = 'rgba(255, 180, 90, 1)';
 const NODE_COLOR = 'rgba(220, 220, 230, 0.95)';
@@ -34,20 +34,20 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
   const particlesArrayRef = useRef<Particle[]>([]);
   const isMountedRef = useRef(true);
   const burstState = useRef({ active: false, duration: 0, started: 0 });
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
+  const mousePosition = useRef({ x: 0, y: 0 });
+  const isHovering = useRef(false);
 
   // Add mouse interaction
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ 
+      mousePosition.current = { 
         x: (e.clientX / window.innerWidth) * 2 - 1,
         y: -(e.clientY / window.innerHeight) * 2 + 1
-      });
+      };
     };
 
-    const handleMouseEnter = () => setIsHovering(true);
-    const handleMouseLeave = () => setIsHovering(false);
+    const handleMouseEnter = () => isHovering.current = true;
+    const handleMouseLeave = () => isHovering.current = false;
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseenter', handleMouseEnter);
@@ -177,11 +177,11 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
 
       // Add mouse influence to particles
       particles.forEach(particle => {
-        const dx = particle.x - (mousePosition.x * canvas.width / 2 + canvas.width / 2);
-        const dy = particle.y - (mousePosition.y * canvas.height / 2 + canvas.height / 2);
+        const dx = particle.x - (mousePosition.current.x * canvas.width / 2 + canvas.width / 2);
+        const dy = particle.y - (mousePosition.current.y * canvas.height / 2 + canvas.height / 2);
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance < 200 && isHovering) {
+        if (distance < 200 && isHovering.current) {
           // Repel particles from mouse
           const force = (200 - distance) / 200;
           particle.x += (dx / distance) * force * 2;
@@ -200,18 +200,18 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
     }
 
     animationFrameId.current = requestAnimationFrame(animate);
-  }, [calculateParticlePositions, drawConnections, interval, isHovering, mousePosition.x, mousePosition.y]);
+  }, [calculateParticlePositions, drawConnections, interval]);
 
-  // Reduce particle count based on screen size
   const calculateOptimalParticleCount = useCallback((width: number, height: number) => {
     const area = width * height;
     const isMobile = width < 768;
     
     if (isMobile) {
-      return Math.min(120, Math.max(60, area / 4000));
+      return Math.min(100, Math.max(50, area / 8000));
     }
     
-    return Math.min(250, Math.max(120, area / 2760));
+    // For desktop, reduce density and max particles to improve performance on large screens
+    return Math.min(200, Math.max(100, area / 15000));
   }, []);
 
   const init = useCallback((particleCount: number) => {
@@ -261,8 +261,10 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
       const canvas = canvasRef.current;
       if (!canvas) return;
       
-      canvas.width = window.innerWidth * 2;
-      canvas.height = window.innerHeight * 2;
+      const maxWidth = 1920 * 2;
+      const maxHeight = 1080 * 2;
+      canvas.width = Math.min(window.innerWidth * 2, maxWidth);
+      canvas.height = Math.min(window.innerHeight * 2, maxHeight);
       
       // Reinitialize with optimal particle count
       const optimalCount = calculateOptimalParticleCount(canvas.width, canvas.height);
@@ -278,9 +280,10 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
     const ctx = canvas.getContext('2d', { alpha: false }); // Disable alpha for better performance
     if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = window.innerWidth * 2;
-    canvas.height = window.innerHeight * 2;
+    const maxWidth = 1920 * 2;
+    const maxHeight = 1080 * 2;
+    canvas.width = Math.min(window.innerWidth * 2, maxWidth);
+    canvas.height = Math.min(window.innerHeight * 2, maxHeight);
 
     // Initialize with optimal particle count
     const optimalCount = calculateOptimalParticleCount(canvas.width, canvas.height);
