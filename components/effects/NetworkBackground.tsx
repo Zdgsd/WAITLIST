@@ -24,6 +24,8 @@ interface NetworkBackgroundProps {
   animationTrigger: number;
 }
 
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+
 const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({ 
   offset, 
   isTransitioning, 
@@ -36,6 +38,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
   const burstState = useRef({ active: false, duration: 0, started: 0 });
   const mousePosition = useRef({ x: 0, y: 0 });
   const isHovering = useRef(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // Add mouse interaction
   useEffect(() => {
@@ -273,6 +276,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
   }, [calculateOptimalParticleCount, init]);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     isMountedRef.current = true;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -303,7 +307,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [animate, handleResize, calculateOptimalParticleCount, init]);
+  }, [animate, handleResize, calculateOptimalParticleCount, init, prefersReducedMotion]);
 
   useEffect(() => {
     if (animationTrigger > 0) {

@@ -9,6 +9,7 @@ import { supabase } from './supabaseClient';
 import { LensFlares } from './components/effects/LensFlares';
 import { DynamicGradient } from './components/effects/DynamicGradient';
 import { SceneTransition } from './components/effects/SceneTransition';
+import { Chat } from './components/scenes/Chat';
 
 // Lazy load scene components
 const CorporateShell = React.lazy(() => import('./components/scenes/CorporateShell').then(module => ({ default: module.CorporateShell })));
@@ -19,8 +20,6 @@ const BrandRevealScene = React.lazy(() => import('./components/scenes/BrandRevea
 const InvitationScene = React.lazy(() => import('./components/scenes/InvitationScene').then(module => ({ default: module.InvitationScene })));
 const MemoryExchangeScene = React.lazy(() => import('./components/scenes/MemoryExchangeScene').then(module => ({ default: module.MemoryExchangeScene })));
 const CompletionScene = React.lazy(() => import('./components/scenes/CompletionScene').then(module => ({ default: module.CompletionScene })));
-const ChatLoginScene = React.lazy(() => import('./components/scenes/ChatLoginScene').then(module => ({ default: module.ChatLoginScene })));
-const ChatOverlay = React.lazy(() => import('./components/scenes/ChatOverlay'));
 const ExitScene = React.lazy(() => import('./components/scenes/ExitScene').then(module => ({ default: module.ExitScene })));
 const InvestorPage = React.lazy(() => import('./components/scenes/InvestorPage').then(module => ({ default: module.InvestorPage })));
 
@@ -49,11 +48,7 @@ const AppContent: React.FC = () => {
     const [animationTrigger, setAnimationTrigger] = React.useState(0);
     const [submissionStatus, setSubmissionStatus] = React.useState<SubmissionStatus>('idle');
     const [isSkipping, setIsSkipping] = React.useState(false);
-    const [showChatIcon, setShowChatIcon] = React.useState(true);
     const [showChatModal, setShowChatModal] = React.useState(false);
-    const [chatNickname, setChatNickname] = React.useState('');
-    const [chatSessionId, setChatSessionId] = React.useState<number | null>(null);
-    const [chatUserRole, setChatUserRole] = React.useState('');
 
     const { trackEvent } = useAnalytics();
     const phaseStartTimeRef = React.useRef(Date.now());
@@ -125,20 +120,10 @@ const AppContent: React.FC = () => {
     };
 
     React.useEffect(() => {
-        setChatSessionId(Math.floor(10000 + Math.random() * 90000));
-    }, []);
-    
-    React.useEffect(() => {
         if (phase === AppPhase.MEMORY_EXCHANGE && !memoryNumber) {
           setMemoryNumber(Math.floor(10000 + Math.random() * 90000));
         }
       }, [phase, memoryNumber]);
-
-    const handleChatLogin = (nickname: string, userRole: string) => {
-      setChatNickname(nickname);
-      setChatUserRole(userRole);
-      setShowChatModal(true);
-    };
 
     const renderPhase = () => {
         switch (phase) {
@@ -251,7 +236,7 @@ const AppContent: React.FC = () => {
     const showSkipButton = introPhases.includes(phase) && !isSkipping;
 
     return (
-        <main className="h-screen w-screen overflow-hidden p-2 md:p-4">
+        <main className="h-screen w-screen overflow-hidden p-2 md:p-4 relative">
             <LensFlares intensity={0.2} />
             <DynamicGradient phase={phase.toString()} />
             <SceneTransition isTransitioning={isTransitioning} />
@@ -259,7 +244,8 @@ const AppContent: React.FC = () => {
             {showSkipButton && <SkipButton onClick={() => { setIsSkipping(true); handlePhaseChange(AppPhase.BRAND_REVEAL); }} />} 
             <ErrorBoundary>
                 <div className={`relative w-full h-full ${isCorporate ? '' : 'floating-element-slow'}`}>
-                    {showChatIcon && !showSkipButton && !showChatModal && !chatNickname && (
+                    {showChatModal && <Chat onClose={() => setShowChatModal(false)} />}
+                    {!showChatModal && (
                         <button 
                             onClick={() => setShowChatModal(true)}
                             className="fixed top-4 right-4 z-[1002] p-2 transition-opacity hover:opacity-80"
@@ -287,29 +273,6 @@ const AppContent: React.FC = () => {
                                 {renderPhase()}
                             </div>
                         </CRTWrapper>
-                    )}
-                    {showChatModal && !chatNickname && (
-                        <Suspense fallback={<SceneLoader />}>
-                            <ChatLoginScene onLogin={handleChatLogin} onClose={() => {
-                              setShowChatModal(false);
-                              setChatNickname('');
-                              setChatUserRole('');
-                            }} />
-                        </Suspense>
-                    )}
-                    {showChatModal && chatNickname && chatSessionId && chatUserRole && (
-                        <Suspense fallback={<SceneLoader />}>
-                            <ChatOverlay
-                                chatNickname={chatNickname}
-                                chatSessionId={chatSessionId}
-                                userRole={chatUserRole}
-                                onClose={() => {
-                                  setShowChatModal(false);
-                                  setChatNickname('');
-                                  setChatUserRole('');
-                                }}
-                            />
-                        </Suspense>
                     )}
                 </div>
             </ErrorBoundary>

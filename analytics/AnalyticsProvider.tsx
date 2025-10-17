@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 import { UserSession, EventData, AnalyticsEvent } from './types';
@@ -19,15 +19,27 @@ const AnalyticsContext = createContext<AnalyticsContextValue>({
   trackPerformance: async () => {},
 });
 
-const BATCH_SIZE = 10; // Increased batch size for better performance
-const FLUSH_INTERVAL = 10000; // 10 seconds for reduced network requests
-const DEBUG = process.env.NODE_ENV === 'development'; // Only debug in development
+const BATCH_SIZE = 10;
+const FLUSH_INTERVAL = 10000;
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000;
+const DEBUG = process.env.NODE_ENV === 'development';
 
 export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isSupabaseAvailable, setIsSupabaseAvailable] = useState(false);
   const sessionId = useRef<string>(uuidv4());
   const eventQueue = useRef<AnalyticsEvent[]>([]);
   const flushTimeout = useRef<NodeJS.Timeout>();
   const isFlushingRef = useRef(false);
+  const retryCount = useRef(0);
+
+  useEffect(() => {
+    if (supabase) {
+      setIsSupabaseAvailable(true);
+    } else {
+      console.warn('[Analytics] Supabase client not available. Analytics disabled.');
+    }
+  }, []);
 
   const getUserSession = (): UserSession => ({
     session_id: sessionId.current,
@@ -52,7 +64,12 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const flushEvents = async () => {
-    if (eventQueue.current.length === 0 || isFlushingRef.current) return;
+    if (!isSupabaseAvailable || eventQueue.current.length === 0 || isFlushingRef.current) return;
+
+    if (flushTimeout.current) {
+      clearTimeout(flushTimeout.current);
+      flushTimeout.current = undefined;
+    }
 
     isFlushingRef.current = true;
     const events = eventQueue.current.splice(0, BATCH_SIZE);
@@ -60,10 +77,8 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       if (DEBUG) {
         console.log('[Analytics] Flushing events:', events);
-        console.log('[Analytics] Supabase client:', supabase);
       }
 
-      // Map events to match the database schema
       const mappedEvents = events.map(event => ({
         event_type: event.event_type,
         event_data: event.event_data,
@@ -71,21 +86,25 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         client_timestamp: new Date(event.client_timestamp).toISOString()
       }));
 
-      if (DEBUG) {
-        console.log('[Analytics] Mapped events for insertion:', mappedEvents);
-      }
-
       const { data, error } = await supabase
         .from('user_analytics')
         .insert(mappedEvents)
         .select();
 
       if (error) {
-        console.error('[Analytics] Failed to flush events:', error.message, error.details, error.hint);
-        // Put events back in queue if they failed to send
+        console.error('[Analytics] Failed to flush events:', error.message);
         eventQueue.current = [...events, ...eventQueue.current];
-      } else if (DEBUG) {
-        console.log('[Analytics] Successfully flushed events, inserted data:', data);
+
+        if (retryCount.current < MAX_RETRIES) {
+          const delay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount.current);
+          retryCount.current++;
+          setTimeout(flushEvents, delay);
+        }
+      } else {
+        retryCount.current = 0;
+        if (DEBUG) {
+          console.log('[Analytics] Successfully flushed events, inserted data:', data);
+        }
       }
     } catch (err) {
       console.error('[Analytics] Unexpected error while flushing:', err);
@@ -96,6 +115,8 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const queueEvent = (event: AnalyticsEvent) => {
+    if (!isSupabaseAvailable) return;
+
     eventQueue.current.push(event);
     
     if (eventQueue.current.length >= BATCH_SIZE) {
@@ -107,6 +128,7 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }, FLUSH_INTERVAL);
     }
   };
+
   const trackEvent = async (name: string, props?: Record<string, any>) => {
     const event = {
       event_type: name,
@@ -121,7 +143,6 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     queueEvent(event);
 
-    // Force immediate flush for important events
     if (name.includes('form_submission') || name === 'page_view') {
       flushEvents();
     }
@@ -179,31 +200,30 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   };
 
-  // Initialize session
   useEffect(() => {
+    if (!isSupabaseAvailable) return;
+
     const session = getUserSession();
     if (DEBUG) {
       console.log('[Analytics] Creating session:', session);
     }
     supabase.from('user_sessions').insert([session]).then(({ data, error }) => {
       if (error) {
-        console.error('[Analytics] Failed to create session:', error.message, error.details, error.hint);
+        console.error('[Analytics] Failed to create session:', error.message);
       } else if (DEBUG) {
         console.log('[Analytics] Session created successfully:', data);
       }
     });
 
-    // Track initial page load
     trackPageView(window.location.pathname, { isInitialLoad: true });
 
-    // Cleanup: flush any remaining events
     return () => {
       if (flushTimeout.current) {
         clearTimeout(flushTimeout.current);
       }
       flushEvents();
     };
-  }, []);
+  }, [isSupabaseAvailable]);
 
   return (
     <AnalyticsContext.Provider value={{

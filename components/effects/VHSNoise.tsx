@@ -6,6 +6,8 @@ interface VHSNoiseProps {
   animationTrigger?: number;
 }
 
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+
 export const VHSNoise: React.FC<VHSNoiseProps> = ({
   intensity = 0.0336,
   isTransitioning = false,
@@ -16,6 +18,7 @@ export const VHSNoise: React.FC<VHSNoiseProps> = ({
   const isMountedRef = useRef(true);
   const currentIntensityRef = useRef(intensity);
   const targetIntensityRef = useRef(intensity);
+  const prefersReducedMotion = usePrefersReducedMotion();
   
   // Performance optimization: reduce noise update frequency
   const noiseUpdateInterval = useRef(2); // Update every 2 frames
@@ -79,6 +82,7 @@ export const VHSNoise: React.FC<VHSNoiseProps> = ({
   }, []);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     isMountedRef.current = true;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -105,7 +109,7 @@ export const VHSNoise: React.FC<VHSNoiseProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [generateNoise, handleResize]);
+  }, [generateNoise, handleResize, prefersReducedMotion]);
 
   useEffect(() => {
     if (isTransitioning) {

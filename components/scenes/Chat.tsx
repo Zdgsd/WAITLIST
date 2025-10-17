@@ -2,33 +2,86 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../hooks/useChat';
 import { Button } from '../ui/Button';
 
-interface ChatSceneProps {
-  nickname: string;
-  sessionId: number;
-  userRole: string;
-  onBack: () => void;
+interface ChatProps {
+  onClose: () => void;
 }
 
-interface ChatMessage {
-  id: string;
-  room_id: string;
-  user_name: string;
-  user_role: string;
-  message: string;
-  created_at: string;
-}
+type ChatView = 'login' | 'chat';
 
-interface ChatRoom {
-  id: string;
-  name: string;
-}
+const LoginView: React.FC<{ onLogin: (nickname: string, userRole: string) => void; onClose: () => void; }> = ({ onLogin, onClose }) => {
+  const [nickname, setNickname] = useState('');
 
-export const ChatScene: React.FC<ChatSceneProps> = ({
-  nickname,
-  sessionId,
-  userRole,
-  onBack
-}) => {
+  const handleLogin = () => {
+    if (nickname.trim()) {
+      onLogin(nickname, 'user');
+    }
+  };
+
+  const handleAnonLogin = () => {
+    const anonNickname = `anon_${Math.floor(1000 + Math.random() * 9000)}`;
+    onLogin(anonNickname, 'anonymous');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
+  return (
+    <div className="h-full flex flex-col items-center justify-center p-6 text-[var(--terminal-green)]">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-400 hover:text-[var(--terminal-green)] text-xl leading-none"
+          aria-label="Close Chat Login"
+        >
+          &times;
+        </button>
+        
+        <div className="text-center">
+          <div className="text-xs text-gray-400 mb-2 tracking-widest">BOOKEENI NETWORK</div>
+          <h2 className="text-xl mb-2 text-[var(--terminal-green)] animate-pulse">CHAT ACCESS</h2>
+          <div className="text-sm text-gray-400 mb-6">Join the community terminal</div>
+          
+          <div className="mb-6 text-left">
+            <label htmlFor="nickname-input" className="block text-sm text-gray-400 mb-2">USER HANDLE:</label>
+            <input
+              id="nickname-input"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="enter_your_handle"
+              className="w-full p-3 bg-black/40 border border-[var(--terminal-green)]/30 text-white placeholder-gray-500 focus:outline-none focus:border-[var(--terminal-green)] transition-colors"
+              autoFocus
+            />
+          </div>
+          
+          <div className="flex flex-col space-y-3">
+            <button
+              onClick={handleLogin}
+              className="w-full bg-[var(--terminal-green)]/10 border border-[var(--terminal-green)]/50 text-[var(--terminal-green)] py-3 rounded hover:bg-[var(--terminal-green)]/20 hover:border-[var(--terminal-green)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!nickname.trim()}
+            >
+              [ CONNECT AS: {nickname.trim() || 'USER'} ]
+            </button>
+            <button
+              onClick={handleAnonLogin}
+              className="w-full bg-gray-700/20 border border-gray-600/50 text-gray-400 py-3 rounded hover:bg-gray-700/40 hover:text-gray-300 hover:border-gray-500 transition-all duration-200"
+            >
+              [ CONNECT ANONYMOUSLY ]
+            </button>
+          </div>
+          
+          <div className="mt-6 text-xs text-gray-500">
+            Secure connection established • End-to-end encrypted
+          </div>
+        </div>
+    </div>
+  );
+};
+
+const ChatViewComponent: React.FC<{ nickname: string; sessionId: number; userRole: string; onBack: () => void; }> = ({ nickname, sessionId, userRole, onBack }) => {
   const { messages, sendMessage, isLoading, chatRooms, activeRoomId, setActiveRoomId } = useChat(nickname, userRole, sessionId);
   const [newMessage, setNewMessage] = useState('');
   const [showRoomSelection, setShowRoomSelection] = useState(false);
@@ -64,9 +117,9 @@ export const ChatScene: React.FC<ChatSceneProps> = ({
   const activeRoomName = chatRooms.find(room => room.id === activeRoomId)?.name || 'lobby';
 
   return (
-    <div className="flex flex-col h-full font-mono text-[var(--terminal-green)] relative overflow-hidden">
-      {/* Header with app-style branding */}
-      <div className="flex justify-between items-center p-3 border-b border-[var(--terminal-green)]/30 bg-black/20 backdrop-blur-sm">
+    <div className="flex flex-col h-full text-[var(--terminal-green)]">
+      {/* Header */}
+      <div className="flex-shrink-0 flex justify-between items-center p-3 border-b border-[var(--terminal-green)]/30 bg-black/20 backdrop-blur-sm">
         <div className="flex items-center space-x-3">
           <div className="text-xs text-gray-400 opacity-60">BOOKEENI</div>
           <div className="h-4 border-l border-[var(--terminal-green)]/40"></div>
@@ -114,14 +167,8 @@ export const ChatScene: React.FC<ChatSceneProps> = ({
         </div>
       )}
 
-      {/* Messages Area - Transparent with visible background */}
-      <div 
-        className="flex-grow overflow-y-auto p-3 text-sm space-y-1 bg-transparent"
-        style={{ 
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--terminal-green) transparent'
-        }}
-      >
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto p-3 text-sm space-y-1">
         {messages.map((msg) => (
           <div key={msg.id} className="flex hover:bg-black/10 px-2 py-1 rounded transition-colors">
             <div className="flex-shrink-0 w-16 sm:w-20">
@@ -156,10 +203,9 @@ export const ChatScene: React.FC<ChatSceneProps> = ({
         )}
       </div>
 
-      {/* Input Area - Integrated with app theme */}
-      <div className="p-3 border-t border-[var(--terminal-green)]/20 bg-black/30 backdrop-blur-sm">
+      {/* Input Area */}
+      <div className="flex-shrink-0 p-3 border-t border-[var(--terminal-green)]/20 bg-black/30 backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          {/* Removed nickname@terminal:~$ */}
           <div className="flex-1 relative w-full">
             <input
               type="text"
@@ -187,17 +233,51 @@ export const ChatScene: React.FC<ChatSceneProps> = ({
           </Button>
         </div>
       </div>
+    </div>
+  );
+};
 
-      {/* CRT Effect Overlay */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0" style={{
-          background: `linear-gradient(
-            rgba(18, 16, 16, 0) 50%,
-            rgba(0, 0, 0, 0.25) 50%
-          )`,
-          backgroundSize: '100% 4px',
-          opacity: 0.1
-        }}></div>
+export const Chat: React.FC<ChatProps> = ({ onClose }) => {
+  const [view, setView] = useState<ChatView>('login');
+  const [nickname, setNickname] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const [sessionId, setSessionId] = useState<number | null>(null);
+
+  const handleLogin = (name: string, role: string) => {
+    setNickname(name);
+    setUserRole(role);
+    setSessionId(Math.floor(10000 + Math.random() * 90000));
+    setView('chat');
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 p-4 flex flex-col bg-black/80 backdrop-blur-md font-mono">
+      <div className="relative w-full h-full border border-[var(--terminal-green)]/30 rounded-lg overflow-hidden crt-terminal-box flex flex-col">
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--terminal-green)]/5 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[var(--terminal-green)]/10 via-transparent to-transparent" />
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-20" 
+          style={{
+            backgroundImage: `repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 2px,
+              rgba(47, 221, 108, 0.1) 2px,
+              rgba(47, 221, 108, 0.1) 4px
+            )`
+          }}
+        />
+        <div className="relative z-10 w-full h-full flex flex-col">
+          {view === 'login' && <LoginView onLogin={handleLogin} onClose={onClose} />}
+          {view === 'chat' && nickname && sessionId && userRole && (
+            <ChatViewComponent
+              nickname={nickname}
+              sessionId={sessionId}
+              userRole={userRole}
+              onBack={onClose}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
