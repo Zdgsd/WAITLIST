@@ -1,5 +1,5 @@
 // components/scenes/MemoryExchangeScene.tsx
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { MemoryCardData, UserRole } from '../../types';
 import { HIERARCHICAL_ROLES, ALL_ROLES } from '../../constants';
 import { Button } from '../ui/Button';
@@ -52,7 +52,7 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
   const { displayText: namePrompt } = useTypewriter("What's Your Name?", 80, { enabled: step === 2 && conversationStep === 'name' });
   const { displayText: agePrompt } = useTypewriter(`Nice To Meet You, ${memoryCard.name}. How Old Are You?`, 80, { enabled: step === 2 && conversationStep === 'age' });
   
-  const userDossierString = React.useMemo(() => {
+  const userDossierString = useMemo(() => {
     const parts = [`#${memoryNumber}`];
     if (memoryCard.role) {
         const roleLabel = ALL_ROLES.find(r => r.id === memoryCard.role)?.label;
@@ -77,14 +77,14 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
     }
   }, [conversationStep, triggerBackgroundAnimation]);
 
-  const handleRoleSelect = (role: UserRole) => {
+  const handleRoleSelect = useCallback((role: UserRole) => {
     triggerBackgroundAnimation();
     trackEvent('click', { element_id: 'role_selection', role_id: role });
     setMemoryCard(prev => ({ ...prev, role }));
     setStep(2);
-  };
+  }, [triggerBackgroundAnimation, trackEvent]);
   
-  const changeRoleView = (view: RoleView) => {
+  const changeRoleView = useCallback((view: RoleView) => {
     triggerBackgroundAnimation();
     trackEvent('click', { element_id: 'change_role_view', view: view });
     setIsAnimating(true);
@@ -92,9 +92,9 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
         setRoleView(view);
         setIsAnimating(false);
     }, 300);
-  };
+  }, [triggerBackgroundAnimation, trackEvent]);
 
-  const handleRoleClick = (role: { id: UserRole | string; label: string }) => {
+  const handleRoleClick = useCallback((role: { id: UserRole | string; label: string }) => {
     if (roleView === 'main') {
       const selectedTopLevelRole = HIERARCHICAL_ROLES.find(r => r.id === role.id);
       
@@ -106,9 +106,9 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
     } else {
       handleRoleSelect(role.id as UserRole);
     }
-  };
+  }, [roleView, changeRoleView, handleRoleSelect]);
 
-  const handleNoClick = () => {
+  const handleNoClick = useCallback(() => {
     triggerBackgroundAnimation();
     trackEvent('click', { element_id: 'game_prompt_no', attempt: noCount + 1 });
     if (noCount === 0) {
@@ -119,9 +119,9 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
       trackEvent('form_submission', { form_id: 'waitlist_partial_submission' });
       onSubmit({ ...memoryCard, consentGiven: true });
     }
-  };
+  }, [triggerBackgroundAnimation, trackEvent, noCount, memoryCard, onSubmit]);
 
-  const handleGameAnswer = (answer: string) => {
+  const handleGameAnswer = useCallback((answer: string) => {
     triggerBackgroundAnimation();
     const currentQuestion = gameQuestions[gameQuestionIndex];
     trackEvent('click', { element_id: 'game_answer', question_id: currentQuestion.id, answer });
@@ -141,19 +141,19 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
     } else {
         setStep(4); // Move to consent step
     }
-  }
+  }, [triggerBackgroundAnimation, trackEvent, gameQuestionIndex]);
 
-  const handleConversationSubmit = (nextStep: ConversationStep, details: Record<string, any> = {}) => {
+  const handleConversationSubmit = useCallback((nextStep: ConversationStep, details: Record<string, any> = {}) => {
     triggerBackgroundAnimation();
     trackEvent('form_submission', { form_id: `conversation_${conversationStep}`, ...details });
     setConversationStep(nextStep);
-  };
+  }, [triggerBackgroundAnimation, trackEvent, conversationStep]);
   
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     triggerBackgroundAnimation();
     trackEvent('click', { element_id: 'game_prompt_yes' });
     setStep(3);
-  }
+  }, [triggerBackgroundAnimation, trackEvent]);
 
   const renderRoleSelection = () => {
     const renderButtons = (roles: ({id: UserRole | string; label: string})[]) => (

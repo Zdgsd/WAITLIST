@@ -1,26 +1,31 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { AppPhase, MemoryCardData, SubmissionStatus } from './types';
 import { CRTWrapper } from './components/effects/CRTWrapper';
-import { CorporateShell } from './components/scenes/CorporateShell';
-import { InitializationScene } from './components/scenes/InitializationScene';
-import { TypewriterScene } from './components/scenes/TypewriterScene';
-import { GlitchScene } from './components/scenes/GlitchScene';
-import { BrandRevealScene } from './components/scenes/BrandRevealScene';
-import { InvitationScene } from './components/scenes/InvitationScene';
-import { MemoryExchangeScene } from './components/scenes/MemoryExchangeScene';
-import { CompletionScene } from './components/scenes/CompletionScene';
-import { ChatScene } from './components/scenes/ChatScene';
-import { ChatLoginScene } from './components/scenes/ChatLoginScene';
-import ChatOverlay from './components/scenes/ChatOverlay';
-import { ExitScene } from './components/scenes/ExitScene';
 import { NetworkBackground } from './components/effects/NetworkBackground';
 import { VHSNoise } from './components/effects/VHSNoise';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { InvestorPage } from './components/scenes/InvestorPage';
 import { SkipButton } from './components/ui/SkipButton';
-
 import { AnalyticsProvider, useAnalytics } from './analytics/AnalyticsProvider';
 import { supabase } from './supabaseClient';
+
+// Lazy load scene components
+const CorporateShell = React.lazy(() => import('./components/scenes/CorporateShell').then(module => ({ default: module.CorporateShell })));
+const InitializationScene = React.lazy(() => import('./components/scenes/InitializationScene').then(module => ({ default: module.InitializationScene })));
+const TypewriterScene = React.lazy(() => import('./components/scenes/TypewriterScene').then(module => ({ default: module.TypewriterScene })));
+const GlitchScene = React.lazy(() => import('./components/scenes/GlitchScene').then(module => ({ default: module.GlitchScene })));
+const BrandRevealScene = React.lazy(() => import('./components/scenes/BrandRevealScene').then(module => ({ default: module.BrandRevealScene })));
+const InvitationScene = React.lazy(() => import('./components/scenes/InvitationScene').then(module => ({ default: module.InvitationScene })));
+const MemoryExchangeScene = React.lazy(() => import('./components/scenes/MemoryExchangeScene').then(module => ({ default: module.MemoryExchangeScene })));
+const CompletionScene = React.lazy(() => import('./components/scenes/CompletionScene').then(module => ({ default: module.CompletionScene })));
+const ChatScene = React.lazy(() => import('./components/scenes/ChatScene').then(module => ({ default: module.ChatScene })));
+const ChatLoginScene = React.lazy(() => import('./components/scenes/ChatLoginScene').then(module => ({ default: module.ChatLoginScene })));
+const ChatOverlay = React.lazy(() => import('./components/scenes/ChatOverlay'));
+const ExitScene = React.lazy(() => import('./components/scenes/ExitScene').then(module => ({ default: module.ExitScene })));
+const InvestorPage = React.lazy(() => import('./components/scenes/InvestorPage').then(module => ({ default: module.InvestorPage })));
+
+
+// Add a loading fallback component
+const SceneLoader: React.FC = () => null;
 
 const AppContent: React.FC = () => {
     const [phase, setPhase] = React.useState<AppPhase>(AppPhase.CORPORATE_SHELL);
@@ -139,45 +144,97 @@ const AppContent: React.FC = () => {
     const renderPhase = () => {
         switch (phase) {
             case AppPhase.CORPORATE_SHELL:
-                return <CorporateShell onComplete={() => {
-                    handlePhaseChange(AppPhase.INITIALIZATION);
-                    setVideoActive(true);
-                }} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <CorporateShell onComplete={() => {
+                            handlePhaseChange(AppPhase.INITIALIZATION);
+                            setVideoActive(true);
+                        }} triggerBackgroundAnimation={triggerBackgroundAnimation} />
+                    </Suspense>
+                );
             case AppPhase.INITIALIZATION:
-                return <InitializationScene onComplete={() => handlePhaseChange(AppPhase.IMAGINE_IF)} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <InitializationScene onComplete={() => handlePhaseChange(AppPhase.IMAGINE_IF)} />
+                    </Suspense>
+                );
             case AppPhase.IMAGINE_IF:
-                return <TypewriterScene text="Imagine If..." onComplete={() => handlePhaseChange(AppPhase.GLITCH_1)} finalBlinkOnce />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <TypewriterScene text="Imagine If..." onComplete={() => handlePhaseChange(AppPhase.GLITCH_1)} finalBlinkOnce />
+                    </Suspense>
+                );
             case AppPhase.GLITCH_1:
-                 return <GlitchScene onComplete={() => handlePhaseChange(AppPhase.MEMORY_PROMPT_1)} />;
+                 return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <GlitchScene onComplete={() => handlePhaseChange(AppPhase.MEMORY_PROMPT_1)} />
+                    </Suspense>
+                );
             case AppPhase.MEMORY_PROMPT_1:
-                return <TypewriterScene text="Your Best Memory..." onComplete={() => handlePhaseChange(AppPhase.MEMORY_PROMPT_2)} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <TypewriterScene text="Your Best Memory..." onComplete={() => handlePhaseChange(AppPhase.MEMORY_PROMPT_2)} />
+                    </Suspense>
+                );
             case AppPhase.MEMORY_PROMPT_2:
-                return <TypewriterScene text="Is A Click Away." onComplete={() => handlePhaseChange(AppPhase.BRAND_REVEAL)} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <TypewriterScene text="Is A Click Away." onComplete={() => handlePhaseChange(AppPhase.BRAND_REVEAL)} />
+                    </Suspense>
+                );
             case AppPhase.BRAND_REVEAL:
-                return <BrandRevealScene onComplete={() => handlePhaseChange(AppPhase.INVITATION_BOX)} skipToEnd={isSkipping} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <BrandRevealScene onComplete={() => handlePhaseChange(AppPhase.INVITATION_BOX)} skipToEnd={isSkipping} />
+                    </Suspense>
+                );
             case AppPhase.INVITATION_BOX:
-                return <InvitationScene onComplete={handleInvitationComplete} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <InvitationScene onComplete={handleInvitationComplete} triggerBackgroundAnimation={triggerBackgroundAnimation} />
+                    </Suspense>
+                );
             case AppPhase.MEMORY_EXCHANGE:
-                return <MemoryExchangeScene email={memoryData.email} memoryNumber={memoryNumber} onSubmit={handleMemorySubmit} onExit={() => handlePhaseChange(AppPhase.EXIT)} triggerBackgroundAnimation={triggerBackgroundAnimation} onAgeSubmitted={handleAgeSubmitted} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <MemoryExchangeScene email={memoryData.email} memoryNumber={memoryNumber} onSubmit={handleMemorySubmit} onExit={() => handlePhaseChange(AppPhase.EXIT)} triggerBackgroundAnimation={triggerBackgroundAnimation} onAgeSubmitted={handleAgeSubmitted} />
+                    </Suspense>
+                );
             case AppPhase.COMPLETION:
-                return memoryData && memoryNumber ? <CompletionScene 
-                  data={memoryData} 
-                  memoryNumber={memoryNumber} 
-                  onNavigateToInvestors={() => handlePhaseChange(AppPhase.INVESTOR_PAGE)} 
-                  onOpenChatModal={() => setShowChatModal(true)}
-                  status={submissionStatus}
-                  setStatus={setSubmissionStatus}
-                  triggerBackgroundAnimation={triggerBackgroundAnimation}
-                /> : null;
+                return memoryData && memoryNumber ? (
+                    <Suspense fallback={<SceneLoader />}>
+                        <CompletionScene 
+                          data={memoryData} 
+                          memoryNumber={memoryNumber} 
+                          onNavigateToInvestors={() => handlePhaseChange(AppPhase.INVESTOR_PAGE)} 
+                          onOpenChatModal={() => setShowChatModal(true)}
+                          status={submissionStatus}
+                          setStatus={setSubmissionStatus}
+                          triggerBackgroundAnimation={triggerBackgroundAnimation}
+                        />
+                    </Suspense>
+                ) : null;
             case AppPhase.INVESTOR_PAGE:
-                return <InvestorPage onBack={() => handlePhaseChange(AppPhase.COMPLETION)} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <InvestorPage onBack={() => handlePhaseChange(AppPhase.COMPLETION)} />
+                    </Suspense>
+                );
             case AppPhase.EXIT:
-                return <ExitScene />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <ExitScene />
+                    </Suspense>
+                );
             default:
-                return <CorporateShell onComplete={() => {
-                    handlePhaseChange(AppPhase.INITIALIZATION);
-                    setVideoActive(true);
-                }} triggerBackgroundAnimation={triggerBackgroundAnimation} />;
+                return (
+                    <Suspense fallback={<SceneLoader />}>
+                        <CorporateShell onComplete={() => {
+                            handlePhaseChange(AppPhase.INITIALIZATION);
+                            setVideoActive(true);
+                        }} triggerBackgroundAnimation={triggerBackgroundAnimation} />
+                    </Suspense>
+                );
         }
     };
     
@@ -229,25 +286,29 @@ const AppContent: React.FC = () => {
                         </CRTWrapper>
                     )}
                     {showChatModal && !chatNickname && (
-                        <ChatLoginScene onLogin={handleChatLogin} onClose={() => {
-                          setShowChatModal(false);
-                          setChatNickname(''); // Reset nickname
-                          setChatUserRole(''); // Reset user role
-                          console.log('ChatLoginScene closed. showChatModal:', false, 'chatNickname:', '');
-                        }} />
-                    )}
-                    {showChatModal && chatNickname && chatSessionId && chatUserRole && (
-                        <ChatOverlay
-                            chatNickname={chatNickname}
-                            chatSessionId={chatSessionId}
-                            userRole={chatUserRole}
-                            onClose={() => {
+                        <Suspense fallback={<SceneLoader />}>
+                            <ChatLoginScene onLogin={handleChatLogin} onClose={() => {
                               setShowChatModal(false);
                               setChatNickname(''); // Reset nickname
                               setChatUserRole(''); // Reset user role
-                              console.log('ChatOverlay closed. showChatModal:', false, 'chatNickname:', '');
-                            }}
-                        />
+                              console.log('ChatLoginScene closed. showChatModal:', false, 'chatNickname:', '');
+                            }} />
+                        </Suspense>
+                    )}
+                    {showChatModal && chatNickname && chatSessionId && chatUserRole && (
+                        <Suspense fallback={<SceneLoader />}>
+                            <ChatOverlay
+                                chatNickname={chatNickname}
+                                chatSessionId={chatSessionId}
+                                userRole={chatUserRole}
+                                onClose={() => {
+                                  setShowChatModal(false);
+                                  setChatNickname(''); // Reset nickname
+                                  setChatUserRole(''); // Reset user role
+                                  console.log('ChatOverlay closed. showChatModal:', false, 'chatNickname:', '');
+                                }}
+                            />
+                        </Suspense>
                     )}
                 </div>
             </ErrorBoundary>

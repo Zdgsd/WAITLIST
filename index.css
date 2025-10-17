@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Add these to your existing styles */
+.network-canvas {
+  /* Enable GPU acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+/* Reduce animations on reduced motion preference */
+ @media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-in-zoom,
+  .animate-pulse-glow,
+  .animate-blink {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimize for mobile devices */
+ @media (max-width: 768px) {
+  .network-canvas {
+    opacity: 0.6; /* Reduce opacity on mobile for better performance */
+  }
+  
+  .white-noise-overlay {
+    opacity: 0.08; /* Reduce noise intensity on mobile */
+  }
+}
+
+/* Hardware acceleration for transform-heavy elements */
+.role-button,
+.crt-terminal-box,
+.scene-container {
+  transform: translateZ(0);
+  will-change: transform;
+}
