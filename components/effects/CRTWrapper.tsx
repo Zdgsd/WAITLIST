@@ -13,7 +13,7 @@ export const CRTWrapper: React.FC<{ children: React.ReactNode; videoActive: bool
       {videoActive && (
         <div className="absolute top-0 left-0 w-full h-full z-0 bg-black opacity-30" />
       )}
-      <div className="screen-border" />
+
       <div className="white-noise-overlay" />
       <div className="scanline-overlay" />
       <div className="depth-noise-overlay" />
