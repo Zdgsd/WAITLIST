@@ -1,7 +1,6 @@
 import React, { Suspense } from 'react';
 import { AppPhase, MemoryCardData, SubmissionStatus } from './types';
 import { CRTWrapper } from './components/effects/CRTWrapper';
-import { NetworkBackground } from './components/effects/NetworkBackground';
 import { VHSNoise } from './components/effects/VHSNoise';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SkipButton } from './components/ui/SkipButton';
@@ -20,7 +19,6 @@ const BrandRevealScene = React.lazy(() => import('./components/scenes/BrandRevea
 const InvitationScene = React.lazy(() => import('./components/scenes/InvitationScene').then(module => ({ default: module.InvitationScene })));
 const MemoryExchangeScene = React.lazy(() => import('./components/scenes/MemoryExchangeScene').then(module => ({ default: module.MemoryExchangeScene })));
 const CompletionScene = React.lazy(() => import('./components/scenes/CompletionScene').then(module => ({ default: module.CompletionScene })));
-const ChatScene = React.lazy(() => import('./components/scenes/ChatScene').then(module => ({ default: module.ChatScene })));
 const ChatLoginScene = React.lazy(() => import('./components/scenes/ChatLoginScene').then(module => ({ default: module.ChatLoginScene })));
 const ChatOverlay = React.lazy(() => import('./components/scenes/ChatOverlay'));
 const ExitScene = React.lazy(() => import('./components/scenes/ExitScene').then(module => ({ default: module.ExitScene })));
@@ -30,7 +28,11 @@ const InvestorPage = React.lazy(() => import('./components/scenes/InvestorPage')
 // Add a loading fallback component
 const SceneLoader: React.FC = () => null;
 
+import { useSocialMediaOptimization } from './hooks/useSocialMediaOptimization';
+import { LazyNetworkBackground } from './components/LazyLoader';
+
 const AppContent: React.FC = () => {
+    useSocialMediaOptimization();
     const [phase, setPhase] = React.useState<AppPhase>(AppPhase.CORPORATE_SHELL);
     const [videoActive, setVideoActive] = React.useState(false);
     const [memoryData, setMemoryData] = React.useState<MemoryCardData>({
@@ -80,7 +82,6 @@ const AppContent: React.FC = () => {
         setPhase(newPhase);
         triggerBackgroundAnimation();
 
-        // Removed conditional setShowChatIcon(true) from here
     }, [trackEvent, triggerBackgroundAnimation]);
 
     React.useEffect(() => {
@@ -92,13 +93,10 @@ const AppContent: React.FC = () => {
         const phaseKeys = Object.values(AppPhase);
         const phaseIndex = phaseKeys.indexOf(phase);
         
-        // A simple hash function to incorporate the trigger count
-        const triggerFactor = animationTrigger * 1.618; // Use golden ratio for variety
+        const triggerFactor = animationTrigger * 1.618; 
         const combinedIndex = phaseIndex + triggerFactor;
 
-        // Use golden angle for pseudo-random, non-colliding distribution
         const angle = combinedIndex * (Math.PI * (3 - Math.sqrt(5)));
-        // Move up to 35% of the shortest screen dimension away from the center
         const distance = Math.min(window.innerWidth, window.innerHeight) * 0.35;
         
         const moveX = Math.cos(angle) * distance;
@@ -114,8 +112,7 @@ const AppContent: React.FC = () => {
 
     const handleMemorySubmit = (data: MemoryCardData) => {
         setMemoryData(data);
-        setSubmissionStatus('idle'); // Reset status for this new submission
-        // setShowChatIcon(true); // Removed from here
+        setSubmissionStatus('idle');
         handlePhaseChange(AppPhase.COMPLETION);
     };
 
@@ -125,11 +122,10 @@ const AppContent: React.FC = () => {
     };
 
     const handleAgeSubmitted = () => {
-        // This is now handled by default
     };
 
     React.useEffect(() => {
-        setChatSessionId(Math.floor(10000 + Math.random() * 90000)); // Generate a random 5-digit ID
+        setChatSessionId(Math.floor(10000 + Math.random() * 90000));
     }, []);
     
     React.useEffect(() => {
@@ -280,7 +276,7 @@ const AppContent: React.FC = () => {
                         </div>
                     ) : (
                         <CRTWrapper videoActive={videoActive}>
-                            <NetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} animationTrigger={animationTrigger} />
+                            <LazyNetworkBackground offset={backgroundOffset} isTransitioning={isTransitioning} animationTrigger={animationTrigger} />
                             <VHSNoise
                                 intensity={0.056}
                                 isTransitioning={isTransitioning}
@@ -296,9 +292,8 @@ const AppContent: React.FC = () => {
                         <Suspense fallback={<SceneLoader />}>
                             <ChatLoginScene onLogin={handleChatLogin} onClose={() => {
                               setShowChatModal(false);
-                              setChatNickname(''); // Reset nickname
-                              setChatUserRole(''); // Reset user role
-                              console.log('ChatLoginScene closed. showChatModal:', false, 'chatNickname:', '');
+                              setChatNickname('');
+                              setChatUserRole('');
                             }} />
                         </Suspense>
                     )}
@@ -310,9 +305,8 @@ const AppContent: React.FC = () => {
                                 userRole={chatUserRole}
                                 onClose={() => {
                                   setShowChatModal(false);
-                                  setChatNickname(''); // Reset nickname
-                                  setChatUserRole(''); // Reset user role
-                                  console.log('ChatOverlay closed. showChatModal:', false, 'chatNickname:', '');
+                                  setChatNickname('');
+                                  setChatUserRole('');
                                 }}
                             />
                         </Suspense>

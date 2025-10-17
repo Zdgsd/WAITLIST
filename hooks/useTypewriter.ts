@@ -11,6 +11,8 @@ export const useTypewriter = (text: string, speed: number = 100, options: Typewr
   const [isComplete, setIsComplete] = React.useState(false);
   const [glitchEffect, setGlitchEffect] = React.useState(false);
 
+  const timeoutRef = React.useRef<NodeJS.Timeout>();
+
   React.useEffect(() => {
     if (!enabled) {
       setDisplayText('');
@@ -22,10 +24,9 @@ export const useTypewriter = (text: string, speed: number = 100, options: Typewr
     setDisplayText('');
     setIsComplete(false);
 
-    const typeInterval = setInterval(() => {
+    const type = () => {
       if (currentIndex >= text.length) {
         setIsComplete(true);
-        clearInterval(typeInterval);
         return;
       }
 
@@ -42,9 +43,16 @@ export const useTypewriter = (text: string, speed: number = 100, options: Typewr
 
       currentIndex++;
       setDisplayText(text.substring(0, currentIndex));
-    }, speed + Math.random() * 50 - 25); // Variable speed for more natural typing
+      timeoutRef.current = setTimeout(type, speed + Math.random() * 50 - 25);
+    };
 
-    return () => clearInterval(typeInterval);
+    timeoutRef.current = setTimeout(type, speed);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [text, speed, enabled]);
 
   return { displayText, isComplete, glitchEffect };
