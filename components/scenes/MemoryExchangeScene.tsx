@@ -308,7 +308,7 @@ const MemoryExchangeSceneComponent: React.FC<MemoryExchangeSceneProps> = ({ emai
   return (
     <div className="flex flex-col h-full p-4 md:p-8 text-[var(--terminal-green)]">
       <header className="w-full max-w-4xl mx-auto mb-4">
-        <h1 className="text-2xl md:text-3xl">BOOKEENI</h1>
+        <h1 className="text-4xl md:text-5xl">BOOKEENI</h1>
         <p className="text-lg text-gray-400 break-all">{userDossierString}</p>
       </header>
       <div className="flex-grow overflow-y-auto">

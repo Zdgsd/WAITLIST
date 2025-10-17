@@ -255,7 +255,7 @@ const AppContent: React.FC = () => {
     const showSkipButton = introPhases.includes(phase) && !isSkipping;
 
     return (
-        <main className="h-screen w-screen overflow-hidden">
+        <main className="h-screen w-screen overflow-hidden p-2 md:p-4">
             <LensFlares intensity={0.2} />
             <DynamicGradient phase={phase.toString()} />
             <SceneTransition isTransitioning={isTransitioning} />
@@ -320,7 +320,7 @@ const AppContent: React.FC = () => {
                 </div>
             </ErrorBoundary>
             <div 
-              className={`fixed bottom-2 right-2 md:bottom-6 md:right-6 text-xs text-right text-gray-400 z-[1001] pointer-events-none font-mono opacity-50 ${showChatModal ? 'hidden' : ''}`} 
+              className={`fixed bottom-2 left-2 md:bottom-4 md:left-4 text-xs text-left text-gray-400 z-[1001] pointer-events-none font-mono opacity-50 ${showChatModal ? 'hidden' : ''}`} 
               style={{ textShadow: 'none' }}
             >
               <p>A Platform By: SADOK BOUZAYEN.</p>
@@ -328,6 +328,7 @@ const AppContent: React.FC = () => {
             </div>
             <div className="crt-scanlines" />
             <div className="screen-curvature" />
+            <div className="screen-border" />
         </main>
     );
 };

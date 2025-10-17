@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 
-const WARM_HIGHLIGHT = 'rgba(255, 180, 90, 1)';
-const NODE_COLOR = 'rgba(220, 220, 230, 0.95)';
-const ACCENT_BLUE = 'rgba(100, 150, 255, 0.9)';
-const ACCENT_TEAL = 'rgba(80, 200, 200, 0.9)';
+const WARM_HIGHLIGHT = 'rgba(255, 200, 120, 1)';
+const NODE_COLOR = 'rgba(230, 230, 240, 1)';
+const ACCENT_BLUE = 'rgba(120, 170, 255, 1)';
+const ACCENT_TEAL = 'rgba(100, 220, 220, 1)';
 
 interface Particle {
   x: number;
@@ -223,7 +223,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
     const isMobile = window.innerWidth < 768;
 
     for (let i = 0; i < particleCount; i++) {
-      const size = Math.random() * (isMobile ? 3 : 4) + 2.5;
+      const size = Math.random() * (isMobile ? 3.5 : 4.5) + 3;
       
       const goldenAngle = Math.PI * (3 - Math.sqrt(5));
       const angle = i * goldenAngle;
@@ -236,7 +236,7 @@ const NetworkBackgroundComponent: React.FC<NetworkBackgroundProps> = ({
       const directionY = ((Math.random() * 1.2) - 0.6) * 0.8;
       const pulseOffset = Math.random() * Math.PI * 2;
       const accentType = Math.random();
-      const isHighlight = Math.random() < 0.15;
+      const isHighlight = Math.random() < 0.25;
       let color = NODE_COLOR;
       if (isHighlight) {
         if (accentType < 0.4) color = WARM_HIGHLIGHT;
