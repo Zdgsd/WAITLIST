@@ -38,6 +38,7 @@ export default defineConfig({
             './components/effects/SceneTransition'
           ]
         },
+        minify: 'terser',
         terserOptions: {
           compress: {
             drop_console: true,
