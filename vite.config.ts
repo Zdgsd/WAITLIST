@@ -38,18 +38,16 @@ export default defineConfig({
             './components/effects/SceneTransition'
           ]
         },
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true
-          }
-        }
       }
     },
     chunkSizeWarningLimit: 800,
-    minify: 'esbuild',
-    brotliSize: true
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
   },
   server: {
     port: 3000,
